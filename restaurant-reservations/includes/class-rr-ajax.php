@@ -16,6 +16,10 @@ class RRAjax {
 		add_action( 'wp_ajax_rr_save_table', array( $this, 'save_table' ) );
 		add_action( 'wp_ajax_rr_delete_table', array( $this, 'delete_table' ) );
 		add_action( 'wp_ajax_rr_get_available_tables', array( $this, 'get_available_tables' ) );
+		// Reservation CRUD handlers (staff dashboard)
+		add_action( 'wp_ajax_rr_create_reservation', array( $this, 'create_reservation' ) );
+		add_action( 'wp_ajax_rr_delete_reservation', array( $this, 'delete_reservation' ) );
+		add_action( 'wp_ajax_rr_get_tables_today_reservations', array( $this, 'get_tables_today_reservations' ) );
 	}
 
 	private function verify_public_request() {
@@ -41,13 +45,13 @@ class RRAjax {
 			'email' => sanitize_email( wp_unslash( $_POST['email'] ?? '' ) ), 'phone' => sanitize_text_field( wp_unslash( $_POST['phone'] ?? '' ) ),
 			'notes' => sanitize_textarea_field( wp_unslash( $_POST['notes'] ?? '' ) ),
 		);
-		if ( ! $data['date'] || ! $data['time'] || ! $data['guests'] || ! $data['name'] || ! is_email( $data['email'] ) ) {
+		if ( ! $data['date'] || ! $data['time'] || ! $data['guests'] || ! $data['name'] || empty( $data['phone'] ) ) {
 			$missing = array();
 			if ( ! $data['date'] ) { $missing[] = 'date'; }
 			if ( ! $data['time'] ) { $missing[] = 'time'; }
 			if ( ! $data['guests'] ) { $missing[] = 'guests'; }
 			if ( ! $data['name'] ) { $missing[] = 'name'; }
-			if ( ! is_email( $data['email'] ) ) { $missing[] = 'email'; }
+			if ( empty( $data['phone'] ) ) { $missing[] = 'phone'; }
 			wp_send_json_error( array( 'message' => __( 'Please complete all required fields.', 'restaurant-reservations' ), 'missing' => $missing ), 400 );
 		}
 		$calendar = new RRCalendar();
@@ -254,5 +258,140 @@ class RRAjax {
 		$calendar = new RRCalendar();
 		$tables = $calendar->get_available_tables( $date, $time, $guests );
 		wp_send_json_success( array( 'tables' => $tables ) );
+	}
+
+	/**
+	 * AJAX: Create a new reservation from staff dashboard.
+	 */
+	public function create_reservation() {
+		if ( ! is_user_logged_in() || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ?? '' ) ), 'rr_staff_nonce' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Session expired.', 'restaurant-reservations' ) ), 403 );
+		}
+		$data = array(
+			'date'                => sanitize_text_field( wp_unslash( $_POST['date'] ?? '' ) ),
+			'time'                => sanitize_text_field( wp_unslash( $_POST['time'] ?? '' ) ),
+			'guests'              => absint( $_POST['guests'] ?? 0 ),
+			'name'                => sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) ),
+			'phone'               => sanitize_text_field( wp_unslash( $_POST['phone'] ?? '' ) ),
+			'email'               => sanitize_email( wp_unslash( $_POST['email'] ?? '' ) ),
+			'notes'               => sanitize_textarea_field( wp_unslash( $_POST['notes'] ?? '' ) ),
+			'table_id'            => absint( $_POST['table_id'] ?? 0 ),
+			'location_preference' => sanitize_text_field( wp_unslash( $_POST['location_preference'] ?? '' ) ),
+		);
+
+		if ( ! $data['date'] || ! $data['time'] || $data['guests'] < 1 || $data['guests'] > 20 || empty( $data['name'] ) || empty( $data['phone'] ) ) {
+			wp_send_json_error( array( 'message' => __( 'Please complete all required fields.', 'restaurant-reservations' ) ), 400 );
+		}
+
+		$post_id = wp_insert_post( array(
+			'post_type'   => 'rr_reservation',
+			'post_status' => 'pending',
+			'post_title'  => $data['name'],
+			'post_content'=> $data['notes'],
+		), true );
+
+		if ( is_wp_error( $post_id ) ) {
+			wp_send_json_error( array( 'message' => __( 'Could not create the reservation.', 'restaurant-reservations' ) ), 500 );
+		}
+
+		update_post_meta( $post_id, '_rr_date', $data['date'] );
+		update_post_meta( $post_id, '_rr_time', $data['time'] );
+		update_post_meta( $post_id, '_rr_guests', $data['guests'] );
+		update_post_meta( $post_id, '_rr_name', $data['name'] );
+		update_post_meta( $post_id, '_rr_phone', $data['phone'] );
+		update_post_meta( $post_id, '_rr_email', $data['email'] );
+		update_post_meta( $post_id, '_rr_notes', $data['notes'] );
+		update_post_meta( $post_id, '_rr_location_preference', $data['location_preference'] );
+		if ( $data['table_id'] > 0 ) {
+			$table_title = get_the_title( $data['table_id'] );
+			update_post_meta( $post_id, '_rr_table', $table_title );
+		}
+
+		wp_send_json_success( array(
+			'message' => __( 'Reservation created.', 'restaurant-reservations' ),
+			'id'      => $post_id,
+			'name'    => $data['name'],
+			'time'    => $data['time'],
+			'guests'  => $data['guests'],
+		) );
+	}
+
+	/**
+	 * AJAX: Delete a reservation from staff dashboard.
+	 */
+	public function delete_reservation() {
+		if ( ! is_user_logged_in() || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ?? '' ) ), 'rr_staff_nonce' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Session expired.', 'restaurant-reservations' ) ), 403 );
+		}
+		$reservation_id = absint( $_POST['reservation_id'] ?? 0 );
+		if ( ! $reservation_id || 'rr_reservation' !== get_post_type( $reservation_id ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid reservation.', 'restaurant-reservations' ) ), 400 );
+		}
+		$result = wp_delete_post( $reservation_id, true );
+		if ( ! $result ) {
+			wp_send_json_error( array( 'message' => __( 'Could not delete the reservation.', 'restaurant-reservations' ) ), 500 );
+		}
+		wp_send_json_success( array( 'message' => __( 'Reservation deleted.', 'restaurant-reservations' ) ) );
+	}
+
+	/**
+	 * AJAX: Get today's reservations grouped by table for table cards display.
+	 */
+	public function get_tables_today_reservations() {
+		if ( ! is_user_logged_in() || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['nonce'] ?? '' ) ), 'rr_staff_nonce' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Session expired.', 'restaurant-reservations' ) ), 403 );
+		}
+		$date = isset( $_GET['date'] ) ? sanitize_text_field( wp_unslash( $_GET['date'] ) ) : current_time( 'Y-m-d' );
+
+		$reservations = get_posts( array(
+			'post_type'      => 'rr_reservation',
+			'post_status'    => array( 'pending', 'confirmed', 'cancelled', 'completed' ),
+			'posts_per_page' => -1,
+			'no_found_rows'  => true,
+			'meta_key'       => '_rr_time',
+			'orderby'        => 'meta_value',
+			'order'          => 'ASC',
+			'meta_query'     => array( array(
+				'key'   => '_rr_date',
+				'value' => $date,
+			) ),
+		) );
+
+		$grouped = array();
+		foreach ( $reservations as $reservation ) {
+			$table_name = get_post_meta( $reservation->ID, '_rr_table', true );
+			$time       = get_post_meta( $reservation->ID, '_rr_time', true );
+			$guests     = get_post_meta( $reservation->ID, '_rr_guests', true );
+			$name       = get_the_title( $reservation->ID );
+
+			// Try to find table_id from table name
+			$table_id = 0;
+			if ( $table_name ) {
+				$table_post = get_posts( array(
+					'post_type' => 'rr_table',
+					'title'     => $table_name,
+					'posts_per_page' => 1,
+					'fields'    => 'ids',
+				) );
+				if ( ! empty( $table_post ) ) {
+					$table_id = $table_post[0];
+				}
+			}
+
+			if ( ! isset( $grouped[ $table_id ] ) ) {
+				$grouped[ $table_id ] = array();
+			}
+
+			$grouped[ $table_id ][] = array(
+				'id'     => $reservation->ID,
+				'time'   => $time,
+				'name'   => $name,
+				'guests' => $guests,
+				'status' => $reservation->post_status,
+				'table'  => $table_name,
+			);
+		}
+
+		wp_send_json_success( $grouped );
 	}
 }

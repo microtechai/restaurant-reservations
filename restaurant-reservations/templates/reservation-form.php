@@ -17,8 +17,8 @@
 		<section class="rr-form-step" data-step="3">
 			<h2><?php esc_html_e( 'Your details', 'restaurant-reservations' ); ?></h2>
 			<label><?php esc_html_e( 'Name', 'restaurant-reservations' ); ?> <span aria-hidden="true">*</span><input type="text" name="name" required autocomplete="name"></label>
-			<label><?php esc_html_e( 'Email', 'restaurant-reservations' ); ?> <span aria-hidden="true">*</span><input type="email" name="email" required autocomplete="email"></label>
-			<label><?php esc_html_e( 'Phone', 'restaurant-reservations' ); ?><input type="tel" name="phone" autocomplete="tel"></label>
+			<label><?php esc_html_e( 'Email', 'restaurant-reservations' ); ?><input type="email" name="email" autocomplete="email"></label>
+			<label><?php esc_html_e( 'Phone', 'restaurant-reservations' ); ?> <span aria-hidden="true">*</span><input type="tel" name="phone" required autocomplete="tel"></label>
 			<label><?php esc_html_e( 'Special requests', 'restaurant-reservations' ); ?><textarea name="notes" rows="4"></textarea></label>
 			<div class="rr-honeypot" aria-hidden="true"><label><?php esc_html_e( 'Website', 'restaurant-reservations' ); ?><input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
 			<div class="rr-step-buttons"><button type="button" class="rr-back button"><?php esc_html_e( 'Back', 'restaurant-reservations' ); ?></button><button type="submit" class="rr-submit button"><span><?php esc_html_e( 'Request reservation', 'restaurant-reservations' ); ?></span><i class="rr-spinner" aria-hidden="true"></i></button></div>

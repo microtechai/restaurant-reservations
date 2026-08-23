@@ -290,18 +290,44 @@
 		var activeClass = table.active ? '' : ' is-inactive';
 		var statusClass = table.active ? 'active' : 'inactive';
 		var statusLabel = table.active ? 'Activa' : 'Inactiva';
-		return '<article class="rr-table-card' + activeClass + '" data-table-id="' + table.id + '">' +
+		var html = '<article class="rr-table-card' + activeClass + '" data-table-id="' + table.id + '">' +
 			'<h4>' + $('<span>').text(table.title).html() + '</h4>' +
 			'<div class="rr-table-details">' +
 				'<span class="rr-table-capacity">👤 ' + table.capacity + ' pers (mín. ' + table.min_guests + ')</span>' +
 				'<span class="rr-table-location">' + locIcon + ' ' + locLabel + '</span>' +
 				'<span class="rr-table-status rr-table-status--' + statusClass + '">' + statusLabel + '</span>' +
 			'</div>' +
+			'<div class="rr-table-reservations">' + renderTableTodayReservations(table.id) + '</div>' +
 			'<div class="rr-table-actions">' +
 				'<button type="button" class="rr-table-edit" data-id="' + table.id + '">Editar</button>' +
 				'<button type="button" class="rr-table-delete" data-id="' + table.id + '">Eliminar</button>' +
 			'</div>' +
 		'</article>';
+		return html;
+	}
+
+	/**
+	 * Render today's reservations for a table card.
+	 */
+	function renderTableTodayReservations(tableId) {
+		if (!window.rrStaffTodayReservations) {
+			return '<p class="rr-table-reservation-empty">Sin reservas hoy</p>';
+		}
+		var todayData = window.rrStaffTodayReservations[tableId];
+		if (!todayData || !todayData.length) {
+			return '<p class="rr-table-reservation-empty">Sin reservas hoy</p>';
+		}
+		var html = '<div class="rr-table-reservation-list">';
+		$.each(todayData, function (_, r) {
+			html += '<div class="rr-table-reservation-item">' +
+				'<span class="rr-table-reservation-time">' + r.time + '</span> ' +
+				'<span class="rr-table-reservation-name">' + $('<span>').text(r.name).html() + '</span> ' +
+				'<span class="rr-table-reservation-guests">(' + r.guests + ')</span> ' +
+				'<span class="rr-status rr-status--' + r.status + '">' + statusLabel(r.status) + '</span>' +
+			'</div>';
+		});
+		html += '</div>';
+		return html;
 	}
 
 	/**
@@ -316,15 +342,38 @@
 				showFlash((response.data && response.data.message) || rrStaff.i18n.error, 'error');
 				return;
 			}
-			if (!response.data || !response.data.length) {
-				$list.html('<p class="rr-empty-state">No hay mesas configuradas.</p>');
-				return;
-			}
-			var html = '';
-			$.each(response.data, function (_, table) {
-				html += renderTableCard(table);
+			// Also load today's reservations per table
+			$.get(rrStaff.ajaxUrl, {
+				action: 'rr_get_tables_today_reservations',
+				nonce: rrStaff.nonce,
+				date: rrStaff.today
+			}).done(function (reservationsResponse) {
+				if (reservationsResponse.success) {
+					window.rrStaffTodayReservations = reservationsResponse.data;
+				} else {
+					window.rrStaffTodayReservations = {};
+				}
+				if (!response.data || !response.data.length) {
+					$list.html('<p class="rr-empty-state">No hay mesas configuradas.</p>');
+					return;
+				}
+				var html = '';
+				$.each(response.data, function (_, table) {
+					html += renderTableCard(table);
+				});
+				$list.html(html);
+			}).fail(function () {
+				window.rrStaffTodayReservations = {};
+				if (!response.data || !response.data.length) {
+					$list.html('<p class="rr-empty-state">No hay mesas configuradas.</p>');
+					return;
+				}
+				var html = '';
+				$.each(response.data, function (_, table) {
+					html += renderTableCard(table);
+				});
+				$list.html(html);
 			});
-			$list.html(html);
 		}).fail(function () {
 			showFlash(rrStaff.i18n.error, 'error');
 		});
@@ -383,10 +432,11 @@
 		};
 		$.post(rrStaff.ajaxUrl, data).done(function (response) {
 			if (!response.success) {
+				console.log('rr_save_table error:', response.data && response.data.message);
 				window.alert((response.data && response.data.message) || rrStaff.i18n.error);
 				return;
 			}
-			showFlash(response.data.title + ' guardada.', 'success');
+			showFlash('Mesa guardada exitosamente', 'success');
 			closeModal();
 			loadTables();
 		}).fail(function () {
@@ -410,6 +460,158 @@
 	$(function () {
 		if ($('#rr-tables-list').length) {
 			loadTables();
+		}
+	});
+
+})(jQuery);
+
+/* ===== Reservation Management (CRUD desde staff dashboard) ===== */
+(function ($) {
+	'use strict';
+
+	var $resModal = $('#rr-reservation-modal');
+	var $resForm = $('#rr-reservation-form');
+	var $flash = $('.rr-staff-flash');
+
+	/**
+	 * Show a flash message.
+	 */
+	function showFlash(message, type) {
+		type = type || '';
+		$flash.stop(true, true)
+			.removeClass('rr-flash--error rr-flash--success')
+			.addClass(type ? 'rr-flash--' + type : '')
+			.text(message)
+			.prop('hidden', false)
+			.hide()
+			.fadeIn(150);
+		window.setTimeout(function () {
+			$flash.fadeOut(250, function () { $flash.prop('hidden', true); });
+		}, 2500);
+	}
+
+	/**
+	 * Open the new reservation modal.
+	 */
+	function openReservationModal() {
+		$resForm[0].reset();
+		$resForm.find('[name="date"]').val(rrStaff.today);
+		$resForm.find('[name="time"]').val('');
+		$resForm.find('[name="guests"]').val('2');
+		$resForm.find('[name="location_preference"]').val('');
+		$resForm.find('[name="table_id"]').val('');
+
+		// Load active tables into the select
+		var $tableSelect = $resForm.find('[name="table_id"]');
+		$.get(rrStaff.ajaxUrl, {
+			action: 'rr_get_tables',
+			nonce: rrStaff.nonce
+		}).done(function (response) {
+			if (response.success && response.data) {
+				var options = '<option value="">Sin asignar</option>';
+				$.each(response.data, function (_, table) {
+					var locLabel = 'Interior';
+					if (table.location === 'outdoor') locLabel = 'Terraza';
+					if (table.location === 'bar') locLabel = 'Barra';
+					options += '<option value="' + table.id + '">' +
+						$('<span>').text(table.title).html() + ' (' + table.capacity + ' pers) - ' + locLabel +
+						(table.active ? '' : ' (Inactiva)') +
+						'</option>';
+				});
+				$tableSelect.html(options);
+			}
+		});
+
+		$('#rr-reservation-modal-title').text('Nueva reserva');
+		$resModal.addClass('is-visible');
+	}
+
+	/**
+	 * Close the reservation modal.
+	 */
+	function closeReservationModal() {
+		$resModal.removeClass('is-visible');
+	}
+
+	/**
+	 * Reload today's reservations table section (full page reload).
+	 */
+	function reloadTodayReservations() {
+		location.reload();
+	}
+
+	// === Event handlers ===
+
+	// Open new reservation modal
+	$(document).on('click', '#rr-add-reservation-btn', openReservationModal);
+
+	// Submit new reservation form
+	$resForm.on('submit', function (event) {
+		event.preventDefault();
+		var $submit = $resForm.find('[type="submit"]').prop('disabled', true).text('Guardando...');
+		var data = {
+			action: 'rr_create_reservation',
+			nonce: rrStaff.nonce,
+			date: $resForm.find('[name="date"]').val(),
+			time: $resForm.find('[name="time"]').val(),
+			guests: $resForm.find('[name="guests"]').val(),
+			name: $resForm.find('[name="name"]').val(),
+			phone: $resForm.find('[name="phone"]').val(),
+			email: $resForm.find('[name="email"]').val(),
+			notes: $resForm.find('[name="notes"]').val(),
+			table_id: $resForm.find('[name="table_id"]').val(),
+			location_preference: $resForm.find('[name="location_preference"]').val()
+		};
+		$.post(rrStaff.ajaxUrl, data).done(function (response) {
+			if (!response.success) {
+				console.log('rr_create_reservation error:', response.data && response.data.message);
+				window.alert((response.data && response.data.message) || rrStaff.i18n.error);
+				return;
+			}
+			showFlash('Reserva creada exitosamente', 'success');
+			closeReservationModal();
+			reloadTodayReservations();
+		}).fail(function () {
+			window.alert(rrStaff.i18n.error);
+		}).always(function () {
+			$submit.prop('disabled', false).text('Crear reserva');
+		});
+	});
+
+	// Delete reservation
+	$(document).on('click', '.rr-btn--delete-reservation', function () {
+		var $button = $(this);
+		var id = $button.data('id');
+		if (!window.confirm('¿Eliminar esta reserva definitivamente?')) {
+			return;
+		}
+		$button.prop('disabled', true);
+		$.post(rrStaff.ajaxUrl, {
+			action: 'rr_delete_reservation',
+			nonce: rrStaff.nonce,
+			reservation_id: id
+		}).done(function (response) {
+			if (!response.success) {
+				console.log('rr_delete_reservation error:', response.data && response.data.message);
+				window.alert((response.data && response.data.message) || rrStaff.i18n.error);
+				return;
+			}
+			showFlash('Reserva eliminada.', 'success');
+			reloadTodayReservations();
+		}).fail(function () {
+			window.alert(rrStaff.i18n.error);
+		}).always(function () {
+			$button.prop('disabled', false);
+		});
+	});
+
+	// Close modal on backdrop click or close button
+	$(document).on('click', '.rr-modal-backdrop, .rr-modal-close, .rr-modal-close-trigger', closeReservationModal);
+
+	// Close modal on Escape key
+	$(document).on('keydown', function (event) {
+		if (event.key === 'Escape' && !$resModal.prop('hidden')) {
+			closeReservationModal();
 		}
 	});
 

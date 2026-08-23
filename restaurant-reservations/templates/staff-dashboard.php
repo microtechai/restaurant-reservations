@@ -105,7 +105,10 @@ wp_enqueue_style( 'rr-staff-fonts', 'https://fonts.googleapis.com/css2?family=In
 	</header>
 
 	<section class="rr-staff-today" aria-labelledby="rr-today-heading">
-		<h2 id="rr-today-heading"><?php echo esc_html( $today_label ); ?></h2>
+		<div class="rr-section-header">
+			<h2 id="rr-today-heading"><?php echo esc_html( $today_label ); ?></h2>
+			<button type="button" class="rr-btn rr-btn--add" id="rr-add-reservation-btn">+ <?php esc_html_e( 'Nueva reserva', 'restaurant-reservations' ); ?></button>
+		</div>
 		<?php if ( empty( $today_reservations ) ) : ?>
 			<p class="rr-empty-state"><?php echo esc_html__( 'No hay reservas para hoy.', 'restaurant-reservations' ); ?></p>
 		<?php else : ?>
@@ -143,6 +146,7 @@ wp_enqueue_style( 'rr-staff-fonts', 'https://fonts.googleapis.com/css2?family=In
 									<button type="button" class="rr-btn rr-btn--complete" data-id="<?php echo esc_attr( $reservation->ID ); ?>" data-status="completed"><?php echo esc_html__( 'Completar', 'restaurant-reservations' ); ?></button>
 								<?php endif; ?>
 								<button type="button" class="rr-btn rr-btn--cancel" data-id="<?php echo esc_attr( $reservation->ID ); ?>" data-status="cancelled"><?php echo esc_html__( 'Cancelar', 'restaurant-reservations' ); ?></button>
+								<button type="button" class="rr-btn rr-btn--delete-reservation" data-id="<?php echo esc_attr( $reservation->ID ); ?>"><?php echo esc_html__( 'Eliminar', 'restaurant-reservations' ); ?></button>
 							</td>
 						</tr>
 					<?php endforeach; ?>
@@ -151,6 +155,76 @@ wp_enqueue_style( 'rr-staff-fonts', 'https://fonts.googleapis.com/css2?family=In
 			</div>
 		<?php endif; ?>
 	</section>
+
+	<!-- Modal for New Reservation -->
+	<div class="rr-modal" id="rr-reservation-modal">
+		<div class="rr-modal-backdrop"></div>
+		<div class="rr-modal-content">
+			<div class="rr-modal-header">
+				<h3 id="rr-reservation-modal-title"><?php esc_html_e( 'Nueva reserva', 'restaurant-reservations' ); ?></h3>
+				<button type="button" class="rr-modal-close">&times;</button>
+			</div>
+			<form id="rr-reservation-form">
+				<label><?php esc_html_e( 'Fecha', 'restaurant-reservations' ); ?>
+					<input type="date" name="date" required value="<?php echo esc_attr( $today_date ); ?>">
+				</label>
+				<label><?php esc_html_e( 'Hora', 'restaurant-reservations' ); ?>
+					<input type="time" name="time" required>
+				</label>
+				<label><?php esc_html_e( 'Número de comensales', 'restaurant-reservations' ); ?>
+					<select name="guests" required>
+						<?php for ( $i = 1; $i <= 20; $i++ ) : ?>
+							<option value="<?php echo esc_attr( $i ); ?>"><?php echo esc_html( $i ); ?></option>
+						<?php endfor; ?>
+					</select>
+				</label>
+				<label><?php esc_html_e( 'Nombre', 'restaurant-reservations' ); ?>
+					<input type="text" name="name" required>
+				</label>
+				<label><?php esc_html_e( 'Teléfono', 'restaurant-reservations' ); ?>
+					<input type="tel" name="phone" required>
+				</label>
+				<label><?php esc_html_e( 'Email', 'restaurant-reservations' ); ?>
+					<input type="email" name="email">
+				</label>
+				<label><?php esc_html_e( 'Notas', 'restaurant-reservations' ); ?>
+					<textarea name="notes" rows="3"></textarea>
+				</label>
+				<label><?php esc_html_e( 'Asignar mesa', 'restaurant-reservations' ); ?>
+					<select name="table_id">
+						<option value=""><?php esc_html_e( 'Sin asignar', 'restaurant-reservations' ); ?></option>
+						<?php
+						$active_tables = get_posts( array(
+							'post_type' => 'rr_table',
+							'posts_per_page' => -1,
+							'no_found_rows' => true,
+							'orderby' => 'title',
+							'order' => 'ASC',
+						) );
+						foreach ( $active_tables as $table ) :
+							$tcap = get_post_meta( $table->ID, '_rr_capacity', true );
+							$tloc = get_post_meta( $table->ID, '_rr_location', true ) ?: 'indoor';
+							$tloc_label = 'indoor' === $tloc ? __( 'Interior', 'restaurant-reservations' ) : ( 'outdoor' === $tloc ? __( 'Terraza', 'restaurant-reservations' ) : __( 'Barra', 'restaurant-reservations' ) );
+						?>
+							<option value="<?php echo esc_attr( $table->ID ); ?>"><?php echo esc_html( get_the_title( $table->ID ) ); ?> (<?php echo esc_html( $tcap ); ?> <?php esc_html_e( 'pers', 'restaurant-reservations' ); ?>) - <?php echo esc_html( $tloc_label ); ?></option>
+						<?php endforeach; ?>
+					</select>
+				</label>
+				<label><?php esc_html_e( 'Ubicación preferida', 'restaurant-reservations' ); ?>
+					<select name="location_preference">
+						<option value=""><?php esc_html_e( 'Sin preferencia', 'restaurant-reservations' ); ?></option>
+						<option value="indoor"><?php esc_html_e( 'Interior', 'restaurant-reservations' ); ?></option>
+						<option value="outdoor"><?php esc_html_e( 'Terraza', 'restaurant-reservations' ); ?></option>
+						<option value="bar"><?php esc_html_e( 'Barra', 'restaurant-reservations' ); ?></option>
+					</select>
+				</label>
+				<div class="rr-modal-actions">
+					<button type="button" class="rr-btn rr-btn--cancel rr-modal-close-trigger"><?php esc_html_e( 'Cancelar', 'restaurant-reservations' ); ?></button>
+					<button type="submit" class="rr-btn rr-btn--complete"><?php esc_html_e( 'Crear reserva', 'restaurant-reservations' ); ?></button>
+				</div>
+			</form>
+		</div>
+	</div>
 
 	<!-- GESTIÓN DE MESAS -->
 	<section class="rr-staff-tables" aria-labelledby="rr-tables-heading">

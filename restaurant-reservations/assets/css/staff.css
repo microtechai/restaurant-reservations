@@ -48,6 +48,7 @@ body .rr-staff-wrap h2, body .rr-staff-wrap h3, .rr-staff-brand { font-family: "
 .rr-btn:disabled { cursor: wait; opacity: .55; transform: none; }
 .rr-btn--complete { background: #10B981; color: white; }
 .rr-btn--cancel { background: #EF4444; color: white; }
+.rr-btn--delete-reservation { background: #6B7280; color: white; }
 .rr-btn--add { background: var(--color-primary); color: #fff; padding: .55rem 1rem; border: 0; border-radius: 7px; cursor: pointer; font-weight: 600; font-size: .9rem; }
 .rr-empty-state { padding: 1rem; border-radius: 8px; background: #1A1A1A; color: var(--color-olive); }
 .rr-calendar-nav { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: 1rem; }
@@ -78,6 +79,13 @@ body .rr-staff-wrap h2, body .rr-staff-wrap h3, .rr-staff-brand { font-family: "
 .rr-table-card .rr-table-details { display: grid; gap: .25rem; font-size: .85rem; color: var(--color-olive); margin-bottom: .8rem; }
 .rr-table-card .rr-table-actions { display: flex; gap: .5rem; }
 .rr-table-card .rr-table-actions button { padding: .32rem .6rem; border: 1px solid var(--color-sand); border-radius: 5px; background: #2A2A2A; color: var(--color-ink); cursor: pointer; font-size: .78rem; }
+.rr-table-reservations { margin-top: .6rem; padding-top: .6rem; border-top: 1px solid var(--color-sand); font-size: .78rem; }
+.rr-table-reservation-list { display: grid; gap: .25rem; }
+.rr-table-reservation-item { color: var(--color-ink); }
+.rr-table-reservation-time { font-weight: 600; color: var(--color-primary); }
+.rr-table-reservation-name { color: var(--color-ink); }
+.rr-table-reservation-guests { color: var(--color-olive); }
+.rr-table-reservation-empty { color: var(--color-olive); font-style: italic; margin: 0; }
 .rr-table-card .rr-table-status { display: inline-block; padding: .15rem .5rem; border-radius: 999px; font-size: .7rem; font-weight: 700; }
 .rr-table-status--active { background: #10B981; color: white; }
 .rr-table-status--inactive { background: #9CA3AF; color: white; }
