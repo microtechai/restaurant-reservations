@@ -81,7 +81,8 @@ body .rr-staff-wrap h2, body .rr-staff-wrap h3, .rr-staff-brand { font-family: "
 .rr-table-card .rr-table-status { display: inline-block; padding: .15rem .5rem; border-radius: 999px; font-size: .7rem; font-weight: 700; }
 .rr-table-status--active { background: #10B981; color: white; }
 .rr-table-status--inactive { background: #9CA3AF; color: white; }
-.rr-modal { position: fixed; inset: 0; z-index: 99999; display: grid; place-items: center; }
+.rr-modal { position: fixed; inset: 0; z-index: 99999; display: none; place-items: center; }
+.rr-modal.is-visible { display: grid; }
 .rr-modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.65); }
 .rr-modal-content { position: relative; width: min(92%, 480px); max-height: 90vh; padding: 2rem; border-radius: 14px; background: #2A2A2A; border: 1px solid var(--color-sand); overflow-y: auto; box-shadow: 0 18px 50px rgba(0,0,0,.3); }
 .rr-modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; }

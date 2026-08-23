@@ -193,7 +193,7 @@ wp_enqueue_style( 'rr-staff-fonts', 'https://fonts.googleapis.com/css2?family=In
 		</div>
 
 		<!-- Modal for Add/Edit table -->
-		<div class="rr-modal" id="rr-table-modal" hidden>
+		<div class="rr-modal" id="rr-table-modal">
 			<div class="rr-modal-backdrop"></div>
 			<div class="rr-modal-content">
 				<div class="rr-modal-header">

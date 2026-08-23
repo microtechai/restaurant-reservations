@@ -233,7 +233,7 @@
 		$form.find('[name="location"]').val('indoor');
 		$form.find('[name="active"]').prop('checked', true);
 		$title.text(rrStaff.i18n.addTable || 'Añadir mesa');
-		$modal.prop('hidden', false);
+		$modal.addClass('is-visible');
 	}
 
 	/**
@@ -266,7 +266,7 @@
 			$form.find('[name="location"]').val(table.location);
 			$form.find('[name="active"]').prop('checked', table.active);
 			$title.text(rrStaff.i18n.editTable || 'Editar mesa');
-			$modal.prop('hidden', false);
+			$modal.addClass('is-visible');
 		}).fail(function () {
 			window.alert(rrStaff.i18n.error);
 		});
@@ -276,7 +276,7 @@
 	 * Close the modal.
 	 */
 	function closeModal() {
-		$modal.prop('hidden', true);
+		$modal.removeClass('is-visible');
 	}
 
 	/**
