@@ -9,6 +9,8 @@ class RRAjax {
 		}
 		add_action( 'wp_ajax_rr_calendar_data', array( $this, 'calendar_data' ) );
 		add_action( 'wp_ajax_rr_update_status', array( $this, 'update_status' ) );
+		add_action( 'wp_ajax_rr_staff_update_status', array( $this, 'staff_update_status' ) );
+		add_action( 'wp_ajax_rr_staff_calendar_data', array( $this, 'staff_calendar_data' ) );
 	}
 
 	private function verify_public_request() {
@@ -62,5 +64,64 @@ class RRAjax {
 		$result = wp_update_post( array( 'ID' => $post_id, 'post_status' => $status ), true );
 		if ( is_wp_error( $result ) ) { wp_send_json_error( array( 'message' => __( 'The status could not be updated.', 'restaurant-reservations' ) ), 500 ); }
 		wp_send_json_success( array( 'message' => __( 'Reservation status updated.', 'restaurant-reservations' ), 'status' => $status, 'label' => RRPostTypes::status_label( $status ) ) );
+	}
+
+	public function staff_update_status() {
+		if ( ! is_user_logged_in() || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ?? '' ) ), 'rr_staff_nonce' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Session expired. Please refresh the page.', 'restaurant-reservations' ) ), 403 );
+		}
+		$post_id = absint( $_POST['post_id'] ?? 0 );
+		$status  = sanitize_key( $_POST['status'] ?? '' );
+		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) || ! in_array( $status, array( 'completed', 'cancelled', 'confirmed', 'pending' ), true ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid request.', 'restaurant-reservations' ) ), 403 );
+		}
+		$result = wp_update_post( array( 'ID' => $post_id, 'post_status' => $status ), true );
+		if ( is_wp_error( $result ) ) {
+			wp_send_json_error( array( 'message' => __( 'Could not update the reservation.', 'restaurant-reservations' ) ), 500 );
+		}
+		wp_send_json_success( array(
+			'message' => __( 'Reservation updated.', 'restaurant-reservations' ),
+			'status'  => $status,
+			'label'   => RRPostTypes::status_label( $status ),
+		) );
+	}
+
+	public function staff_calendar_data() {
+		if ( ! is_user_logged_in() || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ?? '' ) ), 'rr_staff_nonce' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Session expired.', 'restaurant-reservations' ) ), 403 );
+		}
+		$year  = absint( $_POST['year'] ?? current_time( 'Y' ) );
+		$month = absint( $_POST['month'] ?? current_time( 'n' ) );
+		if ( $month < 1 || $month > 12 ) { $month = 1; }
+		$start   = sprintf( '%04d-%02d-01', $year, $month );
+		$end     = gmdate( 'Y-m-t', strtotime( $start ) );
+		$query   = new WP_Query( array(
+			'post_type'      => 'rr_reservation',
+			'post_status'    => array( 'pending', 'confirmed', 'cancelled', 'completed' ),
+			'posts_per_page' => -1,
+			'no_found_rows'  => true,
+			'meta_query'     => array( array(
+				'key'     => '_rr_date',
+				'value'   => array( $start, $end ),
+				'compare' => 'BETWEEN',
+				'type'    => 'DATE',
+			) ),
+		) );
+		$counts = array();
+		$details = array();
+		foreach ( $query->posts as $post ) {
+			$date = get_post_meta( $post->ID, '_rr_date', true );
+			$counts[ $date ] = ( $counts[ $date ] ?? 0 ) + 1;
+			if ( ! isset( $details[ $date ] ) ) { $details[ $date ] = array(); }
+			$details[ $date ][] = array(
+				'id'     => $post->ID,
+				'name'   => get_the_title( $post->ID ),
+				'time'   => get_post_meta( $post->ID, '_rr_time', true ),
+				'guests' => get_post_meta( $post->ID, '_rr_guests', true ),
+				'status' => $post->post_status,
+				'label'  => RRPostTypes::status_label( $post->post_status ),
+			);
+		}
+		wp_send_json_success( array( 'counts' => $counts, 'details' => $details ) );
 	}
 }

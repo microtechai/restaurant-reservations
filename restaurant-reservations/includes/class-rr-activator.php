@@ -26,6 +26,23 @@ class RRActivator {
 		foreach ( $defaults as $key => $value ) {
 			add_option( 'rr_' . $key, $value );
 		}
+		self::create_roles();
 		flush_rewrite_rules();
+	}
+
+	public static function create_roles() {
+		remove_role( 'rr_manager' );
+		add_role(
+			'rr_manager',
+			__( 'Restaurant Manager', 'restaurant-reservations' ),
+			array(
+				'read'                      => true,
+				'edit_posts'                => true,
+				'edit_rr_reservations'      => true,
+				'read_rr_reservation'       => true,
+				'edit_rr_reservation'       => true,
+				'edit_published_rr_reservations' => true,
+			)
+		);
 	}
 }

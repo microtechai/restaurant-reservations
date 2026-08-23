@@ -33,5 +33,6 @@ function rr_initialize_plugin() {
 	new RRFrontend();
 	new RRAjax();
 	new RRStats();
+	new RRStaffDashboard();
 }
 add_action( 'init', 'rr_initialize_plugin', 5 );
