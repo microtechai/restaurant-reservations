@@ -49,6 +49,14 @@ class RRAdmin {
 			'rr-settings',
 			array( $this, 'settings_page' )
 		);
+		add_submenu_page(
+			'rr-reservations',
+			__( 'Tables', 'restaurant-reservations' ),
+			__( 'Tables', 'restaurant-reservations' ),
+			'manage_options',
+			'edit.php?post_type=rr_table',
+			''
+		);
 	}
 
 	public function assets( $hook ) {

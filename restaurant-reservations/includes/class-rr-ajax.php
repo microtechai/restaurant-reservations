@@ -11,6 +11,11 @@ class RRAjax {
 		add_action( 'wp_ajax_rr_update_status', array( $this, 'update_status' ) );
 		add_action( 'wp_ajax_rr_staff_update_status', array( $this, 'staff_update_status' ) );
 		add_action( 'wp_ajax_rr_staff_calendar_data', array( $this, 'staff_calendar_data' ) );
+		// Table AJAX handlers
+		add_action( 'wp_ajax_rr_get_tables', array( $this, 'get_tables' ) );
+		add_action( 'wp_ajax_rr_save_table', array( $this, 'save_table' ) );
+		add_action( 'wp_ajax_rr_delete_table', array( $this, 'delete_table' ) );
+		add_action( 'wp_ajax_rr_get_available_tables', array( $this, 'get_available_tables' ) );
 	}
 
 	private function verify_public_request() {
@@ -131,5 +136,123 @@ class RRAjax {
 			);
 		}
 		wp_send_json_success( array( 'counts' => $counts, 'details' => $details ) );
+	}
+
+	// === TABLE AJAX HANDLERS ===
+
+	/**
+	 * AJAX: Get all tables with their meta.
+	 */
+	public function get_tables() {
+		if ( ! is_user_logged_in() || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['nonce'] ?? '' ) ), 'rr_staff_nonce' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Session expired.', 'restaurant-reservations' ) ), 403 );
+		}
+		$tables = get_posts( array(
+			'post_type' => 'rr_table',
+			'posts_per_page' => -1,
+			'no_found_rows' => true,
+			'orderby' => 'meta_value_num',
+			'meta_key' => '_rr_capacity',
+			'order' => 'ASC',
+		) );
+		$data = array();
+		foreach ( $tables as $table ) {
+			$data[] = array(
+				'id' => $table->ID,
+				'title' => get_the_title( $table->ID ),
+				'capacity' => (int) get_post_meta( $table->ID, '_rr_capacity', true ),
+				'min_guests' => (int) get_post_meta( $table->ID, '_rr_min_guests', true ),
+				'location' => get_post_meta( $table->ID, '_rr_location', true ) ?: 'indoor',
+				'active' => get_post_meta( $table->ID, '_rr_active', true ) === '1',
+			);
+		}
+		wp_send_json_success( $data );
+	}
+
+	/**
+	 * AJAX: Create or update a table.
+	 */
+	public function save_table() {
+		if ( ! is_user_logged_in() || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ?? '' ) ), 'rr_staff_nonce' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Session expired.', 'restaurant-reservations' ) ), 403 );
+		}
+		$table_id = absint( $_POST['table_id'] ?? 0 );
+		$title = sanitize_text_field( wp_unslash( $_POST['title'] ?? '' ) );
+		$capacity = absint( $_POST['capacity'] ?? 4 );
+		$min_guests = absint( $_POST['min_guests'] ?? 1 );
+		$location = sanitize_text_field( wp_unslash( $_POST['location'] ?? 'indoor' ) );
+		$active = isset( $_POST['active'] ) && '1' === $_POST['active'] ? '1' : '0';
+
+		if ( ! $title || $capacity < 1 || $capacity > 20 || $min_guests < 1 || $min_guests > $capacity ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid table data.', 'restaurant-reservations' ) ), 400 );
+		}
+		if ( ! in_array( $location, array( 'indoor', 'outdoor', 'bar' ), true ) ) {
+			$location = 'indoor';
+		}
+
+		if ( $table_id > 0 ) {
+			$post_id = wp_update_post( array(
+				'ID' => $table_id,
+				'post_title' => $title,
+			), true );
+		} else {
+			$post_id = wp_insert_post( array(
+				'post_type' => 'rr_table',
+				'post_status' => 'publish',
+				'post_title' => $title,
+			), true );
+		}
+
+		if ( is_wp_error( $post_id ) ) {
+			wp_send_json_error( array( 'message' => __( 'Could not save the table.', 'restaurant-reservations' ) ), 500 );
+		}
+
+		update_post_meta( $post_id, '_rr_capacity', $capacity );
+		update_post_meta( $post_id, '_rr_min_guests', $min_guests );
+		update_post_meta( $post_id, '_rr_location', $location );
+		update_post_meta( $post_id, '_rr_active', $active );
+
+		wp_send_json_success( array(
+			'id' => $post_id,
+			'title' => $title,
+			'capacity' => $capacity,
+			'min_guests' => $min_guests,
+			'location' => $location,
+			'active' => '1' === $active,
+		) );
+	}
+
+	/**
+	 * AJAX: Delete a table.
+	 */
+	public function delete_table() {
+		if ( ! is_user_logged_in() || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ?? '' ) ), 'rr_staff_nonce' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Session expired.', 'restaurant-reservations' ) ), 403 );
+		}
+		$table_id = absint( $_POST['table_id'] ?? 0 );
+		if ( ! $table_id || 'rr_table' !== get_post_type( $table_id ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid table.', 'restaurant-reservations' ) ), 400 );
+		}
+		$result = wp_delete_post( $table_id, true );
+		if ( ! $result ) {
+			wp_send_json_error( array( 'message' => __( 'Could not delete the table.', 'restaurant-reservations' ) ), 500 );
+		}
+		wp_send_json_success( array( 'message' => __( 'Table deleted.', 'restaurant-reservations' ) ) );
+	}
+
+	/**
+	 * AJAX: Get available tables for a given date, time, and guest count.
+	 */
+	public function get_available_tables() {
+		if ( ! is_user_logged_in() && ! isset( $_GET['nonce_public'] ) ) {
+			// Allow public requests for frontend form
+		}
+		$date = isset( $_GET['date'] ) ? sanitize_text_field( wp_unslash( $_GET['date'] ) ) : '';
+		$time = isset( $_GET['time'] ) ? sanitize_text_field( wp_unslash( $_GET['time'] ) ) : '';
+		$guests = isset( $_GET['guests'] ) ? absint( $_GET['guests'] ) : 1;
+
+		$calendar = new RRCalendar();
+		$tables = $calendar->get_available_tables( $date, $time, $guests );
+		wp_send_json_success( array( 'tables' => $tables ) );
 	}
 }

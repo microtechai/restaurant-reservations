@@ -193,3 +193,224 @@
 		}
 	});
 }(jQuery));
+
+/* ===== Tables Management (Gestión de Mesas) ===== */
+(function ($) {
+	'use strict';
+
+	var $modal = $('#rr-table-modal');
+	var $form = $('#rr-table-form');
+	var $list = $('#rr-tables-list');
+	var $title = $('#rr-table-modal-title');
+	var $flash = $('.rr-staff-flash');
+
+	/**
+	 * Show a flash message.
+	 */
+	function showFlash(message, type) {
+		type = type || '';
+		$flash.stop(true, true)
+			.removeClass('rr-flash--error rr-flash--success')
+			.addClass(type ? 'rr-flash--' + type : '')
+			.text(message)
+			.prop('hidden', false)
+			.hide()
+			.fadeIn(150);
+		window.setTimeout(function () {
+			$flash.fadeOut(250, function () { $flash.prop('hidden', true); });
+		}, 2500);
+	}
+
+	/**
+	 * Open modal for creating a new table.
+	 */
+	function openCreateModal() {
+		$form[0].reset();
+		$form.find('[name="table_id"]').val('');
+		$form.find('[name="title"]').prop('readonly', false);
+		$form.find('[name="capacity"]').val('4');
+		$form.find('[name="min_guests"]').val('1');
+		$form.find('[name="location"]').val('indoor');
+		$form.find('[name="active"]').prop('checked', true);
+		$title.text(rrStaff.i18n.addTable || 'Añadir mesa');
+		$modal.prop('hidden', false);
+	}
+
+	/**
+	 * Open modal for editing an existing table.
+	 */
+	function openEditModal(tableId) {
+		$.get(rrStaff.ajaxUrl, {
+			action: 'rr_get_tables',
+			nonce: rrStaff.nonce
+		}).done(function (response) {
+			if (!response.success) {
+				window.alert((response.data && response.data.message) || rrStaff.i18n.error);
+				return;
+			}
+			var table = null;
+			$.each(response.data, function (_, t) {
+				if (parseInt(t.id, 10) === parseInt(tableId, 10)) {
+					table = t;
+					return false;
+				}
+			});
+			if (!table) {
+				window.alert(rrStaff.i18n.error);
+				return;
+			}
+			$form.find('[name="table_id"]').val(table.id);
+			$form.find('[name="title"]').val(table.title);
+			$form.find('[name="capacity"]').val(table.capacity);
+			$form.find('[name="min_guests"]').val(table.min_guests);
+			$form.find('[name="location"]').val(table.location);
+			$form.find('[name="active"]').prop('checked', table.active);
+			$title.text(rrStaff.i18n.editTable || 'Editar mesa');
+			$modal.prop('hidden', false);
+		}).fail(function () {
+			window.alert(rrStaff.i18n.error);
+		});
+	}
+
+	/**
+	 * Close the modal.
+	 */
+	function closeModal() {
+		$modal.prop('hidden', true);
+	}
+
+	/**
+	 * Render a single table card from data object.
+	 */
+	function renderTableCard(table) {
+		var locIcon = '🏠';
+		var locLabel = 'Interior';
+		if (table.location === 'outdoor') { locIcon = '🌿'; locLabel = 'Terraza'; }
+		if (table.location === 'bar') { locIcon = '🍸'; locLabel = 'Barra'; }
+		var activeClass = table.active ? '' : ' is-inactive';
+		var statusClass = table.active ? 'active' : 'inactive';
+		var statusLabel = table.active ? 'Activa' : 'Inactiva';
+		return '<article class="rr-table-card' + activeClass + '" data-table-id="' + table.id + '">' +
+			'<h4>' + $('<span>').text(table.title).html() + '</h4>' +
+			'<div class="rr-table-details">' +
+				'<span class="rr-table-capacity">👤 ' + table.capacity + ' pers (mín. ' + table.min_guests + ')</span>' +
+				'<span class="rr-table-location">' + locIcon + ' ' + locLabel + '</span>' +
+				'<span class="rr-table-status rr-table-status--' + statusClass + '">' + statusLabel + '</span>' +
+			'</div>' +
+			'<div class="rr-table-actions">' +
+				'<button type="button" class="rr-table-edit" data-id="' + table.id + '">Editar</button>' +
+				'<button type="button" class="rr-table-delete" data-id="' + table.id + '">Eliminar</button>' +
+			'</div>' +
+		'</article>';
+	}
+
+	/**
+	 * Load and render all tables via AJAX.
+	 */
+	function loadTables() {
+		$.get(rrStaff.ajaxUrl, {
+			action: 'rr_get_tables',
+			nonce: rrStaff.nonce
+		}).done(function (response) {
+			if (!response.success) {
+				showFlash((response.data && response.data.message) || rrStaff.i18n.error, 'error');
+				return;
+			}
+			if (!response.data || !response.data.length) {
+				$list.html('<p class="rr-empty-state">No hay mesas configuradas.</p>');
+				return;
+			}
+			var html = '';
+			$.each(response.data, function (_, table) {
+				html += renderTableCard(table);
+			});
+			$list.html(html);
+		}).fail(function () {
+			showFlash(rrStaff.i18n.error, 'error');
+		});
+	}
+
+	// === Event handlers ===
+
+	// Open modal for new table
+	$(document).on('click', '#rr-add-table-btn', openCreateModal);
+
+	// Open modal for edit
+	$(document).on('click', '.rr-table-edit', function () {
+		var id = $(this).data('id');
+		openEditModal(id);
+	});
+
+	// Delete table
+	$(document).on('click', '.rr-table-delete', function () {
+		var $button = $(this);
+		var id = $button.data('id');
+		if (!window.confirm('¿Eliminar esta mesa?')) {
+			return;
+		}
+		$button.prop('disabled', true);
+		$.post(rrStaff.ajaxUrl, {
+			action: 'rr_delete_table',
+			nonce: rrStaff.nonce,
+			table_id: id
+		}).done(function (response) {
+			if (!response.success) {
+				window.alert((response.data && response.data.message) || rrStaff.i18n.error);
+				return;
+			}
+			showFlash(response.data.message || 'Mesa eliminada.', 'success');
+			loadTables();
+		}).fail(function () {
+			window.alert(rrStaff.i18n.error);
+		}).always(function () {
+			$button.prop('disabled', false);
+		});
+	});
+
+	// Submit form (create / update)
+	$form.on('submit', function (event) {
+		event.preventDefault();
+		var $submit = $form.find('[type="submit"]').prop('disabled', true);
+		var data = {
+			action: 'rr_save_table',
+			nonce: rrStaff.nonce,
+			table_id: $form.find('[name="table_id"]').val(),
+			title: $form.find('[name="title"]').val(),
+			capacity: $form.find('[name="capacity"]').val(),
+			min_guests: $form.find('[name="min_guests"]').val(),
+			location: $form.find('[name="location"]').val(),
+			active: $form.find('[name="active"]').is(':checked') ? '1' : '0'
+		};
+		$.post(rrStaff.ajaxUrl, data).done(function (response) {
+			if (!response.success) {
+				window.alert((response.data && response.data.message) || rrStaff.i18n.error);
+				return;
+			}
+			showFlash(response.data.title + ' guardada.', 'success');
+			closeModal();
+			loadTables();
+		}).fail(function () {
+			window.alert(rrStaff.i18n.error);
+		}).always(function () {
+			$submit.prop('disabled', false);
+		});
+	});
+
+	// Close modal on backdrop click or close button
+	$(document).on('click', '.rr-modal-backdrop, .rr-modal-close, .rr-modal-close-trigger', closeModal);
+
+	// Close modal on Escape key
+	$(document).on('keydown', function (event) {
+		if (event.key === 'Escape' && !$modal.prop('hidden')) {
+			closeModal();
+		}
+	});
+
+	// Initial load of tables if the grid exists
+	$(function () {
+		if ($('#rr-tables-list').length) {
+			loadTables();
+		}
+	});
+
+})(jQuery);
