@@ -169,8 +169,7 @@ wp_enqueue_style( 'rr-staff-fonts', 'https://fonts.googleapis.com/css2?family=In
 					<input type="date" name="date" required value="<?php echo esc_attr( $today_date ); ?>">
 				</label>
 				<label><?php esc_html_e( 'Hora', 'restaurant-reservations' ); ?>
-					<input type="time" name="time" step="60" required>
-					<small><?php esc_html_e( 'Formato 24h (ej: 20:45)', 'restaurant-reservations' ); ?></small>
+					<input type="text" name="time" placeholder="20:45" pattern="(?:[01]\d|2[0-3]):[0-5]\d" title="Formato 24h (ej: 20:45)" required>
 				</label>
 				<label><?php esc_html_e( 'Número de comensales', 'restaurant-reservations' ); ?>
 					<input type="number" name="guests" min="1" max="99" required>

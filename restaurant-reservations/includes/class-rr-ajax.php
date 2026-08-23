@@ -91,8 +91,9 @@ class RRAjax {
 		if ( ! is_user_logged_in() || ! $verified ) {
 			wp_send_json_error( array( 'message' => __( 'Session expired. Please refresh the page.', 'restaurant-reservations' ) ), 403 );
 		}
-		$status  = sanitize_key( $_POST['status'] ?? '' );
-		if ( ! $post_id || ! current_user_can( 'edit_rr_reservation', $post_id ) || ! in_array( $status, array( 'completed', 'cancelled', 'confirmed', 'pending' ), true ) ) {
+		$status   = sanitize_key( $_POST['status'] ?? '' );
+		$can_edit = current_user_can( 'manage_options' ) || current_user_can( 'edit_rr_reservation', $post_id );
+		if ( ! $post_id || ! $can_edit || ! in_array( $status, array( 'completed', 'cancelled', 'confirmed', 'pending' ), true ) ) {
 			wp_send_json_error( array( 'message' => __( 'Invalid request.', 'restaurant-reservations' ) ), 403 );
 		}
 		$result = wp_update_post( array( 'ID' => $post_id, 'post_status' => $status ), true );
