@@ -169,14 +169,11 @@ wp_enqueue_style( 'rr-staff-fonts', 'https://fonts.googleapis.com/css2?family=In
 					<input type="date" name="date" required value="<?php echo esc_attr( $today_date ); ?>">
 				</label>
 				<label><?php esc_html_e( 'Hora', 'restaurant-reservations' ); ?>
-					<input type="time" name="time" required>
+					<input type="time" name="time" step="60" required>
+					<small><?php esc_html_e( 'Formato 24h (ej: 20:45)', 'restaurant-reservations' ); ?></small>
 				</label>
 				<label><?php esc_html_e( 'Número de comensales', 'restaurant-reservations' ); ?>
-					<select name="guests" required>
-						<?php for ( $i = 1; $i <= 20; $i++ ) : ?>
-							<option value="<?php echo esc_attr( $i ); ?>"><?php echo esc_html( $i ); ?></option>
-						<?php endfor; ?>
-					</select>
+					<input type="number" name="guests" min="1" max="99" required>
 				</label>
 				<label><?php esc_html_e( 'Nombre', 'restaurant-reservations' ); ?>
 					<input type="text" name="name" required>
@@ -219,7 +216,7 @@ wp_enqueue_style( 'rr-staff-fonts', 'https://fonts.googleapis.com/css2?family=In
 					</select>
 				</label>
 				<div class="rr-modal-actions">
-					<button type="button" class="rr-btn rr-btn--cancel rr-modal-close-trigger"><?php esc_html_e( 'Cancelar', 'restaurant-reservations' ); ?></button>
+					<button type="button" class="rr-btn rr-modal-close-trigger"><?php esc_html_e( 'Cancelar', 'restaurant-reservations' ); ?></button>
 					<button type="submit" class="rr-btn rr-btn--complete"><?php esc_html_e( 'Crear reserva', 'restaurant-reservations' ); ?></button>
 				</div>
 			</form>

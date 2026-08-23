@@ -84,10 +84,13 @@ class RRAjax {
 	}
 
 	public function staff_update_status() {
-		if ( ! is_user_logged_in() || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ?? '' ) ), 'rr_staff_nonce' ) ) {
+		$nonce    = sanitize_text_field( wp_unslash( $_POST['nonce'] ?? '' ) );
+		$post_id  = absint( $_POST['post_id'] ?? 0 );
+		$verified = wp_verify_nonce( $nonce, 'rr_staff_nonce' );
+		error_log( 'rr_staff_update_status nonce: ' . $nonce . ', post_id: ' . $post_id );
+		if ( ! is_user_logged_in() || ! $verified ) {
 			wp_send_json_error( array( 'message' => __( 'Session expired. Please refresh the page.', 'restaurant-reservations' ) ), 403 );
 		}
-		$post_id = absint( $_POST['post_id'] ?? 0 );
 		$status  = sanitize_key( $_POST['status'] ?? '' );
 		if ( ! $post_id || ! current_user_can( 'edit_rr_reservation', $post_id ) || ! in_array( $status, array( 'completed', 'cancelled', 'confirmed', 'pending' ), true ) ) {
 			wp_send_json_error( array( 'message' => __( 'Invalid request.', 'restaurant-reservations' ) ), 403 );
@@ -279,7 +282,7 @@ class RRAjax {
 			'location_preference' => sanitize_text_field( wp_unslash( $_POST['location_preference'] ?? '' ) ),
 		);
 
-		if ( ! $data['date'] || ! $data['time'] || $data['guests'] < 1 || $data['guests'] > 20 || empty( $data['name'] ) || empty( $data['phone'] ) ) {
+		if ( ! $data['date'] || ! $data['time'] || $data['guests'] < 1 || $data['guests'] > 99 || empty( $data['name'] ) || empty( $data['phone'] ) ) {
 			wp_send_json_error( array( 'message' => __( 'Please complete all required fields.', 'restaurant-reservations' ) ), 400 );
 		}
 
@@ -293,6 +296,7 @@ class RRAjax {
 		if ( is_wp_error( $post_id ) ) {
 			wp_send_json_error( array( 'message' => __( 'Could not create the reservation.', 'restaurant-reservations' ) ), 500 );
 		}
+		error_log( 'create_reservation post_id: ' . $post_id );
 
 		update_post_meta( $post_id, '_rr_date', $data['date'] );
 		update_post_meta( $post_id, '_rr_time', $data['time'] );
@@ -307,13 +311,7 @@ class RRAjax {
 			update_post_meta( $post_id, '_rr_table', $table_title );
 		}
 
-		wp_send_json_success( array(
-			'message' => __( 'Reservation created.', 'restaurant-reservations' ),
-			'id'      => $post_id,
-			'name'    => $data['name'],
-			'time'    => $data['time'],
-			'guests'  => $data['guests'],
-		) );
+		wp_send_json_success( array( 'id' => $post_id, 'message' => 'Reserva creada exitosamente' ) );
 	}
 
 	/**

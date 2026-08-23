@@ -150,7 +150,7 @@
 
 	$(document).on('click', '.rr-day-detail-close', closeDetail);
 
-	$(document).on('click', '.rr-btn--complete, .rr-btn--cancel', function () {
+	$(document).on('click', '[data-reservation-id] .rr-btn--complete, [data-reservation-id] .rr-btn--cancel', function () {
 		var $button = $(this);
 		var id = $button.data('id');
 		var status = $button.data('status');
@@ -447,7 +447,7 @@
 	});
 
 	// Close modal on backdrop click or close button
-	$(document).on('click', '.rr-modal-backdrop, .rr-modal-close, .rr-modal-close-trigger', closeModal);
+	$(document).on('click', '#rr-table-modal .rr-modal-backdrop, #rr-table-modal .rr-modal-close, #rr-table-modal .rr-modal-close-trigger', closeModal);
 
 	// Close modal on Escape key
 	$(document).on('keydown', function (event) {
@@ -563,16 +563,18 @@
 			location_preference: $resForm.find('[name="location_preference"]').val()
 		};
 		$.post(rrStaff.ajaxUrl, data).done(function (response) {
+			console.log('create_resp', response);
 			if (!response.success) {
 				console.log('rr_create_reservation error:', response.data && response.data.message);
-				window.alert((response.data && response.data.message) || rrStaff.i18n.error);
+				showFlash((response.data && response.data.message) || rrStaff.i18n.error, 'error');
 				return;
 			}
 			showFlash('Reserva creada exitosamente', 'success');
 			closeReservationModal();
 			reloadTodayReservations();
-		}).fail(function () {
-			window.alert(rrStaff.i18n.error);
+		}).fail(function (xhr) {
+			var response = xhr.responseJSON;
+			showFlash((response && response.data && response.data.message) || rrStaff.i18n.error, 'error');
 		}).always(function () {
 			$submit.prop('disabled', false).text('Crear reserva');
 		});
@@ -606,7 +608,10 @@
 	});
 
 	// Close modal on backdrop click or close button
-	$(document).on('click', '.rr-modal-backdrop, .rr-modal-close, .rr-modal-close-trigger', closeReservationModal);
+	$(document).on('click', '#rr-reservation-modal .rr-modal-backdrop, #rr-reservation-modal .rr-modal-close, #rr-reservation-modal .rr-modal-close-trigger', function (event) {
+		event.preventDefault();
+		closeReservationModal();
+	});
 
 	// Close modal on Escape key
 	$(document).on('keydown', function (event) {
