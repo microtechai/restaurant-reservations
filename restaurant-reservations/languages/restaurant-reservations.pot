@@ -1,0 +1,30 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Restaurant Reservations 1.0.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Domain: restaurant-reservations\n"
+
+#: templates/reservation-form.php
+msgid "Choose a date and time"
+msgstr ""
+
+#: templates/reservation-form.php
+msgid "How many guests?"
+msgstr ""
+
+#: templates/reservation-form.php
+msgid "Your details"
+msgstr ""
+
+#: includes/class-rr-admin.php
+msgid "Reservations"
+msgstr ""
+
+#: includes/class-rr-settings.php
+msgid "Reservation Settings"
+msgstr ""
+
+#: includes/class-rr-stats.php
+msgid "Reservation Statistics"
+msgstr ""
