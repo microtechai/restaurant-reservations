@@ -3,12 +3,13 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 class RRThemeBridge {
     public function __construct() {
-        add_action( 'wp_enqueue_scripts', array( $this, 'inject_theme_styles' ), 999 );
+        add_filter( 'rr_reservation_form_before', array( $this, 'inject_theme_styles' ) );
     }
 
-    public function inject_theme_styles() {
-        if ( ! is_singular() || ! has_shortcode( get_post()->post_content, 'rr_reservation_form' ) ) {
-            return;
+    public function inject_theme_styles( $content ) {
+        global $post;
+        if ( ! $post || ! has_shortcode( $post->post_content, 'rr_reservation_form' ) ) {
+            return $content;
         }
 
         $palette = $this->get_theme_palette();
@@ -73,15 +74,12 @@ class RRThemeBridge {
 ';
         }
 
-        $style_id = 'rr-theme-bridge';
-        $style = '<style id="' . $style_id . '">' . $css . '</style>';
+        $style = '<style id="rr-theme-bridge">' . $css . '</style>';
         if ( $logo_html ) {
             $style = '<div class="rr-brand-logo">' . $logo_html . '</div>' . $style;
         }
 
-        add_filter( 'rr_reservation_form_before', function() use ( $style ) {
-            return $style;
-        } );
+        return $content . $style;
     }
 
     private function get_theme_palette() {
