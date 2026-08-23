@@ -1,0 +1,369 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Restaurant Reservations 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: \n"
+"Language-Team: Español\n"
+"Language: es_ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Hermes Agent\n"
+"X-Domain: restaurant-reservations\n"
+
+#: templates/staff-dashboard.php
+msgid "Teléfono"
+msgstr "Teléfono"
+
+#: templates/staff-dashboard.php
+msgid "Email"
+msgstr "Email"
+
+#: templates/staff-dashboard.php
+msgid "Notas"
+msgstr "Notas"
+
+#: templates/reservation-form.php
+msgid "Reservation progress"
+msgstr "Progreso de la reserva"
+
+#: templates/reservation-form.php
+msgid "Choose a date and time"
+msgstr "Elige fecha y hora"
+
+#: templates/reservation-form.php
+msgid "Continue"
+msgstr "Continuar"
+
+#: templates/reservation-form.php
+msgid "Back"
+msgstr "Atrás"
+
+#: templates/reservation-form.php
+msgid "How many guests?"
+msgstr "¿Cuántos comensales?"
+
+#: templates/reservation-form.php
+msgid "Guests"
+msgstr "Comensales"
+
+#: templates/reservation-form.php
+msgid "Your details"
+msgstr "Tus datos"
+
+#: templates/reservation-form.php
+msgid "Name"
+msgstr "Nombre"
+
+#: templates/reservation-form.php
+msgid "Phone"
+msgstr "Teléfono"
+
+#: templates/reservation-form.php
+msgid "Special requests"
+msgstr "Solicitudes especiales"
+
+#: templates/reservation-form.php
+msgid "Website"
+msgstr "Sitio web"
+
+#: templates/reservation-form.php
+msgid "Request reservation"
+msgstr "Solicitar reserva"
+
+#: includes/class-rr-admin.php
+msgid "Reservations"
+msgstr "Reservas"
+
+#: includes/class-rr-admin.php
+msgid "Reservation"
+msgstr "Reserva"
+
+#: includes/class-rr-admin.php
+msgid "All Reservations"
+msgstr "Todas las reservas"
+
+#: includes/class-rr-calendar.php
+msgid "Calendar"
+msgstr "Calendario"
+
+#: includes/class-rr-stats.php
+msgid "Statistics"
+msgstr "Estadísticas"
+
+#: includes/class-rr-settings.php
+msgid "Settings"
+msgstr "Configuración"
+
+#: includes/class-rr-settings.php
+msgid "Tables"
+msgstr "Mesas"
+
+#: includes/class-rr-settings.php
+msgid "Add Table"
+msgstr "Añadir mesa"
+
+#: includes/class-rr-admin.php
+msgid "Edit Table"
+msgstr "Editar mesa"
+
+#: templates/staff-dashboard.php
+msgid "Table Details"
+msgstr "Detalles de la mesa"
+
+#: includes/class-rr-settings.php
+msgid "Maximum guests per slot"
+msgstr "Máximo de comensales por franja"
+
+#: includes/class-rr-settings.php
+msgid "Time slot interval"
+msgstr "Intervalo de horarios"
+
+#: includes/class-rr-settings.php
+msgid "Blocked dates"
+msgstr "Fechas bloqueadas"
+
+#: includes/class-rr-settings.php
+msgid "Business Hours"
+msgstr "Horario comercial"
+
+#: includes/class-rr-settings.php
+msgid "Enable notifications"
+msgstr "Activar notificaciones"
+
+#: includes/class-rr-settings.php
+msgid "Administrator email"
+msgstr "Email del administrador"
+
+#: includes/class-rr-email.php
+msgid "Email templates"
+msgstr "Plantillas de email"
+
+#: templates/staff-dashboard.php
+msgid "Previous month"
+msgstr "Mes anterior"
+
+#: templates/staff-dashboard.php
+msgid "Next month"
+msgstr "Mes siguiente"
+
+#: templates/staff-dashboard.php
+msgid "Previous"
+msgstr "Anterior"
+
+#: templates/staff-dashboard.php
+msgid "Next"
+msgstr "Siguiente"
+
+#: templates/staff-dashboard.php
+msgid "Add Reservation"
+msgstr "Añadir reserva"
+
+#: includes/class-rr-admin.php
+msgid "Edit Reservation"
+msgstr "Editar reserva"
+
+#: includes/class-rr-admin.php
+msgid "Reservation Details"
+msgstr "Detalles de la reserva"
+
+#: includes/class-rr-stats.php
+msgid "Filter"
+msgstr "Filtrar"
+
+#: includes/class-rr-admin.php
+msgid "All statuses"
+msgstr "Todos los estados"
+
+#: includes/class-rr-admin.php
+msgid "Pending"
+msgstr "Pendiente"
+
+#: includes/class-rr-admin.php
+msgid "Confirmed"
+msgstr "Confirmada"
+
+#: includes/class-rr-admin.php
+msgid "Cancelled"
+msgstr "Cancelada"
+
+#: includes/class-rr-admin.php
+msgid "Completed"
+msgstr "Completada"
+
+#: includes/class-rr-admin.php
+msgid "Export CSV"
+msgstr "Exportar CSV"
+
+#: includes/class-rr-stats.php
+msgid "Report date"
+msgstr "Fecha del informe"
+
+#: templates/staff-dashboard.php
+msgid "Update"
+msgstr "Actualizar"
+
+#: includes/class-rr-stats.php
+msgid "Daily"
+msgstr "Diario"
+
+#: includes/class-rr-stats.php
+msgid "Weekly"
+msgstr "Semanal"
+
+#: includes/class-rr-stats.php
+msgid "Monthly"
+msgstr "Mensual"
+
+#: includes/class-rr-ajax.php
+msgid "Your session expired. Please refresh the page."
+msgstr "Tu sesión ha expirado. Recarga la página."
+
+#: templates/reservation-form.php
+msgid "Select a time"
+msgstr "Selecciona una hora"
+
+#: includes/class-rr-ajax.php
+msgid "No times are available for this date."
+msgstr "No hay horarios disponibles para esta fecha."
+
+#: includes/class-rr-ajax.php
+msgid "Checking availability…"
+msgstr "Verificando disponibilidad…"
+
+#: includes/class-rr-ajax.php
+msgid "This time is unavailable."
+msgstr "Esta hora no está disponible."
+
+#: includes/class-rr-ajax.php
+msgid "Something went wrong. Please try again."
+msgstr "Algo salió mal. Inténtalo de nuevo."
+
+#: includes/class-rr-ajax.php
+msgid "Reservation available."
+msgstr "Reserva disponible."
+
+#: includes/class-rr-ajax.php
+msgid "Unable to process this reservation."
+msgstr "No se puede procesar esta reserva."
+
+#: includes/class-rr-ajax.php
+msgid "Please complete all required fields."
+msgstr "Completa todos los campos obligatorios."
+
+#: includes/class-rr-ajax.php
+msgid "That time is no longer available."
+msgstr "Esa hora ya no está disponible."
+
+#: includes/class-rr-ajax.php
+msgid "The reservation could not be saved."
+msgstr "No se pudo guardar la reserva."
+
+#: includes/class-rr-ajax.php
+msgid "Your reservation has been received."
+msgstr "Tu reserva ha sido recibida."
+
+#: includes/class-rr-ajax.php
+msgid "Change this reservation status?"
+msgstr "¿Cambiar el estado de esta reserva?"
+
+#: includes/class-rr-ajax.php
+msgid "Cancel this reservation?"
+msgstr "¿Cancelar esta reserva?"
+
+#: includes/class-rr-ajax.php
+msgid "The request could not be completed."
+msgstr "No se pudo completar la solicitud."
+
+#: includes/class-rr-ajax.php
+msgid "Reservation created."
+msgstr "Reserva creada."
+
+#: includes/class-rr-ajax.php
+msgid "Invalid request."
+msgstr "Solicitud inválida."
+
+#: includes/class-rr-ajax.php
+msgid "Could not create the reservation."
+msgstr "No se pudo crear la reserva."
+
+#: includes/class-rr-ajax.php
+msgid "Session expired."
+msgstr "Sesión expirada."
+
+#: includes/class-rr-ajax.php
+msgid "Could not delete the table."
+msgstr "No se pudo eliminar la mesa."
+
+#: includes/class-rr-ajax.php
+msgid "Table deleted."
+msgstr "Mesa eliminada."
+
+#: includes/class-rr-ajax.php
+msgid "Invalid table data."
+msgstr "Datos de mesa inválidos."
+
+#: includes/class-rr-ajax.php
+msgid "Invalid table."
+msgstr "Mesa inválida."
+
+#: templates/staff-dashboard.php
+msgid "Staff Dashboard"
+msgstr "Panel de personal"
+
+#: templates/staff-dashboard.php
+msgid "Cotufas 2 — Gestión de reservas"
+msgstr "Cotufas 2 — Gestión de reservas"
+
+#: templates/staff-login.php
+msgid "Acceso personal — Cotufas 2"
+msgstr "Acceso personal — Cotufas 2"
+
+#: templates/staff-dashboard.php
+msgid "Cerrar sesión"
+msgstr "Cerrar sesión"
+
+#: templates/staff-login.php
+msgid "Acceso del personal"
+msgstr "Acceso del personal"
+
+#: templates/staff-dashboard.php
+msgid "Gestión de Mesas"
+msgstr "Gestión de Mesas"
+
+#: templates/staff-dashboard.php
+msgid "Nueva reserva"
+msgstr "Nueva reserva"
+
+#: templates/staff-dashboard.php
+msgid "No hay reservas para hoy."
+msgstr "No hay reservas para hoy."
+
+#: templates/staff-dashboard.php
+msgid "Sin mesa"
+msgstr "Sin mesa"
+
+#: templates/staff-dashboard.php
+msgid "Sin reservas hoy"
+msgstr "Sin reservas hoy"
+
+#: templates/staff-login.php
+msgid "¿Has olvidado tu contraseña?"
+msgstr "¿Has olvidado tu contraseña?"
+
+#: templates/staff-dashboard.php
+msgid "Eliminar"
+msgstr "Eliminar"
+
+#: templates/reservation-form.php
+msgid "Selecciona una hora"
+msgstr "Selecciona una hora"
+
+#: templates/staff-dashboard.php
+msgid "Reserva creada exitosamente"
+msgstr "Reserva creada exitosamente"
+
+#: templates/staff-dashboard.php
+msgid "Mesa guardada exitosamente"
+msgstr "Mesa guardada exitosamente"
