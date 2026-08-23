@@ -11,7 +11,7 @@ class RRStaffDashboard {
 	public function __construct() {
 		add_action( 'init', array( $this, 'rewrite' ) );
 		add_filter( 'query_vars', array( $this, 'query_vars' ) );
-		add_action( 'template_include', array( $this, 'template' ) );
+		add_filter( 'template_include', array( $this, 'template' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'assets' ) );
 		add_filter( 'document_title_parts', array( $this, 'page_title' ) );
 	}

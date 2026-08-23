@@ -27,6 +27,8 @@ class RRActivator {
 			add_option( 'rr_' . $key, $value );
 		}
 		self::create_roles();
+		// Register staff dashboard rewrite rule and persist it
+		add_rewrite_rule( '^mesas/?$', 'index.php?rr_dashboard=1', 'top' );
 		flush_rewrite_rules();
 	}
 
@@ -42,6 +44,7 @@ class RRActivator {
 				'read_rr_reservation'       => true,
 				'edit_rr_reservation'       => true,
 				'edit_published_rr_reservations' => true,
+				'edit_others_rr_reservations'    => true,
 			)
 		);
 	}

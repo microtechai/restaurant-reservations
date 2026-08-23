@@ -20,7 +20,22 @@ class RRPostTypes {
 			'public' => false, 'show_ui' => true, 'show_in_menu' => false, 'menu_icon' => 'dashicons-calendar-alt',
 			'supports' => array( 'title', 'editor', 'custom-fields' ), 'map_meta_cap' => true,
 			'capability_type' => array( 'rr_reservation', 'rr_reservations' ),
-			'capabilities' => array( 'edit_post' => 'edit_post', 'read_post' => 'read_post', 'delete_post' => 'delete_post', 'edit_posts' => 'edit_posts', 'edit_others_posts' => 'edit_others_posts', 'publish_posts' => 'publish_posts', 'read_private_posts' => 'read_private_posts', 'delete_posts' => 'delete_posts', 'delete_private_posts' => 'delete_private_posts', 'delete_published_posts' => 'delete_published_posts', 'delete_others_posts' => 'delete_others_posts', 'edit_private_posts' => 'edit_private_posts', 'edit_published_posts' => 'edit_published_posts', 'create_posts' => 'edit_posts' ),
+			'capabilities' => array(
+						'edit_post'              => 'edit_rr_reservation',
+						'read_post'              => 'read_rr_reservation',
+						'delete_post'            => 'delete_rr_reservation',
+						'edit_posts'             => 'edit_rr_reservations',
+						'edit_others_posts'      => 'edit_others_rr_reservations',
+						'publish_posts'          => 'publish_posts',
+						'read_private_posts'     => 'read_private_posts',
+						'delete_posts'           => 'delete_rr_reservations',
+						'delete_private_posts'   => 'delete_private_posts',
+						'delete_published_posts' => 'delete_published_posts',
+						'delete_others_posts'    => 'delete_others_posts',
+						'edit_private_posts'     => 'edit_private_posts',
+						'edit_published_posts'   => 'edit_published_rr_reservations',
+						'create_posts'           => 'edit_rr_reservations',
+					),
 		) );
 		$statuses = array( 'confirmed' => __( 'Confirmed', 'restaurant-reservations' ), 'cancelled' => __( 'Cancelled', 'restaurant-reservations' ), 'completed' => __( 'Completed', 'restaurant-reservations' ) );
 		foreach ( $statuses as $status => $label ) {
