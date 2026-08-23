@@ -1,1 +1,406 @@
-.rr-reservation-widget{--rr-primary:#9b3a22;--rr-border:#dedbd5;max-width:680px;margin:2rem auto;color:#292723;font-family:inherit}.rr-reservation-form{padding:clamp(1rem,4vw,2rem);border:1px solid var(--rr-border);border-radius:16px;background:#fff;box-shadow:0 12px 35px rgba(32,25,19,.08)}.rr-progress{display:flex;justify-content:center;gap:2.5rem;margin-bottom:1.5rem}.rr-progress span{display:grid;width:2rem;height:2rem;place-items:center;border-radius:50%;background:#eee;color:#666}.rr-progress span.is-active{background:var(--rr-primary);color:#fff}.rr-form-step{display:none}.rr-form-step.is-active{display:block}.rr-form-step h2{margin-top:0;font-size:1.4rem}.rr-form-step label{display:block;margin:.9rem 0;font-weight:600}.rr-form-step input,.rr-form-step select,.rr-form-step textarea{box-sizing:border-box;width:100%;margin-top:.35rem;padding:.75rem;border:1px solid var(--rr-border);border-radius:7px;background:#fff;font:inherit}.rr-datepicker{margin:1rem 0}.rr-datepicker-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}.rr-datepicker-header button{border:0;background:transparent;font-size:2rem;cursor:pointer}.rr-weekdays,.rr-days{display:grid;grid-template-columns:repeat(7,1fr);gap:.3rem;text-align:center}.rr-weekdays span{padding:.35rem;font-size:.8rem;font-weight:700}.rr-days button{aspect-ratio:1;border:0;border-radius:7px;background:#f6f3ef;cursor:pointer}.rr-days button:hover:not(:disabled),.rr-days button.is-selected{background:var(--rr-primary);color:#fff}.rr-days button:disabled{cursor:not-allowed;opacity:.35}.rr-time-slots{display:flex;min-height:2.5rem;flex-wrap:wrap;gap:.5rem;margin:1rem 0}.rr-time-slots button{padding:.55rem .8rem;border:1px solid var(--rr-border);border-radius:6px;background:#fff;cursor:pointer}.rr-time-slots button.is-selected{border-color:var(--rr-primary);background:var(--rr-primary);color:#fff}.rr-step-buttons{display:flex;justify-content:space-between;gap:1rem;margin-top:1rem}.rr-form-step .button{padding:.7rem 1.2rem;border:0;border-radius:7px;background:var(--rr-primary);color:#fff;cursor:pointer}.rr-form-step .button:disabled{opacity:.45;cursor:not-allowed}.rr-back.button{background:#67635d}.rr-honeypot{position:absolute!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;height:1px!important;width:1px!important;margin:-1px!important;padding:0!important;border:0!important}.rr-message{margin-top:1rem;padding:0}.rr-message.is-error,.rr-message.is-success{padding:.8rem;border-radius:6px}.rr-message.is-error{background:#fde8e7;color:#8b1710}.rr-message.is-success{background:#e5f5e9;color:#176528}.rr-spinner{display:none;width:1rem;height:1rem;margin-left:.5rem;border:2px solid rgba(255,255,255,.5);border-top-color:#fff;border-radius:50%;animation:rr-spin .7s linear infinite}.rr-reservation-form.is-loading .rr-spinner,.rr-time-slots.is-loading:after{display:inline-block}@keyframes rr-spin{to{transform:rotate(360deg)}}@media(max-width:480px){.rr-reservation-form{border-radius:8px}.rr-weekdays,.rr-days{gap:.15rem}.rr-days button{font-size:.8rem}.rr-step-buttons{flex-direction:column-reverse}.rr-form-step .button{width:100%}}
+/* ============================================
+   Restaurant Reservations - Frontend Styles
+   Diseño moderno, responsive, adaptable
+   ============================================ */
+
+/* --- Layout & Variables --- */
+.rr-reservation-widget {
+    --rr-primary: #D4451A;
+    --rr-primary-hover: #b83a15;
+    --rr-border: #3A3A3A;
+    --rr-bg-card: #2A2A2A;
+    --rr-bg-input: #1A1A1A;
+    --rr-text: #F5F0E8;
+    --rr-text-muted: #888;
+    --rr-radius: 16px;
+    --rr-radius-sm: 8px;
+    --rr-shadow: 0 12px 40px rgba(0,0,0,0.25);
+    max-width: 680px;
+    margin: 2rem auto;
+    color: var(--rr-text);
+    font-family: inherit;
+}
+
+/* --- Brand Logo --- */
+.rr-brand-logo {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+.rr-brand-logo img {
+    max-height: 72px;
+    width: auto;
+}
+
+/* --- Form Card --- */
+.rr-reservation-form {
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    border: 1px solid var(--rr-border);
+    border-radius: var(--rr-radius);
+    background: var(--rr-bg-card);
+    box-shadow: var(--rr-shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+/* --- Progress Bar --- */
+.rr-progress {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 2rem;
+    position: relative;
+}
+.rr-progress::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 15%;
+    right: 15%;
+    height: 2px;
+    background: var(--rr-border);
+    transform: translateY(-50%);
+    z-index: 0;
+}
+.rr-progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    position: relative;
+    z-index: 1;
+    flex: 1;
+}
+.rr-progress-step span:first-child {
+    display: grid;
+    width: 2.4rem;
+    height: 2.4rem;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--rr-bg-input);
+    color: var(--rr-text-muted);
+    font-weight: 700;
+    font-size: 0.85rem;
+    border: 2px solid var(--rr-border);
+    transition: all 0.3s ease;
+}
+.rr-progress-step span:last-child {
+    font-size: 0.7rem;
+    color: var(--rr-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.rr-progress-step.is-active span:first-child {
+    background: var(--rr-primary);
+    color: #fff;
+    border-color: var(--rr-primary);
+    transform: scale(1.1);
+    box-shadow: 0 0 0 4px rgba(212,69,26,0.2);
+}
+.rr-progress-step.is-active span:last-child {
+    color: var(--rr-primary);
+    font-weight: 600;
+}
+.rr-progress-step.is-completed span:first-child {
+    background: #10B981;
+    color: #fff;
+    border-color: #10B981;
+}
+
+/* --- Form Steps --- */
+.rr-form-step {
+    display: none;
+    animation: rrFadeIn 0.35s ease;
+}
+.rr-form-step.is-active {
+    display: block;
+}
+@keyframes rrFadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.rr-form-step h2 {
+    margin: 0 0 0.25rem;
+    font-size: 1.5rem;
+    color: var(--rr-text);
+    font-weight: 700;
+}
+.rr-form-step .rr-step-subtitle {
+    margin: 0 0 1.5rem;
+    color: var(--rr-text-muted);
+    font-size: 0.9rem;
+}
+
+/* --- Datepicker --- */
+.rr-datepicker {
+    margin: 1.5rem 0;
+}
+.rr-datepicker-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding: 0 0.25rem;
+}
+.rr-datepicker-header button {
+    border: 0;
+    background: transparent;
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: var(--rr-primary);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--rr-radius-sm);
+    transition: background 0.2s;
+}
+.rr-datepicker-header button:hover {
+    background: rgba(212,69,26,0.1);
+}
+.rr-month-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--rr-text);
+}
+.rr-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.25rem;
+    text-align: center;
+    margin-bottom: 0.25rem;
+}
+.rr-weekdays span {
+    padding: 0.4rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--rr-text-muted);
+    text-transform: uppercase;
+}
+.rr-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.25rem;
+    text-align: center;
+}
+.rr-days button {
+    aspect-ratio: 1;
+    border: 0;
+    border-radius: var(--rr-radius-sm);
+    background: var(--rr-bg-input);
+    color: var(--rr-text);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    position: relative;
+}
+.rr-days button:hover:not(:disabled) {
+    background: var(--rr-primary);
+    color: #fff;
+    transform: scale(1.05);
+}
+.rr-days button.is-selected {
+    background: var(--rr-primary);
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 0 0 2px rgba(212,69,26,0.3);
+}
+.rr-days button:disabled {
+    cursor: not-allowed;
+    opacity: 0.2;
+}
+
+/* --- Time Slots --- */
+.rr-time-slots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    min-height: 2.5rem;
+}
+.rr-time-slots button {
+    padding: 0.7rem 1rem;
+    border: 1px solid var(--rr-border);
+    border-radius: var(--rr-radius-sm);
+    background: var(--rr-bg-input);
+    color: var(--rr-text);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    flex: 0 0 auto;
+}
+.rr-time-slots button:hover {
+    border-color: var(--rr-primary);
+    background: rgba(212,69,26,0.1);
+}
+.rr-time-slots button.is-selected {
+    border-color: var(--rr-primary);
+    background: var(--rr-primary);
+    color: #fff;
+    font-weight: 700;
+}
+.rr-time-slots.is-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3rem;
+    color: var(--rr-text-muted);
+}
+
+/* --- Step Buttons --- */
+.rr-step-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+.rr-form-step .button {
+    padding: 0.8rem 1.5rem;
+    border: 0;
+    border-radius: 50px;
+    background: var(--rr-primary);
+    color: #fff;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.rr-form-step .button:hover:not(:disabled) {
+    background: var(--rr-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(212,69,26,0.3);
+}
+.rr-form-step .button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+.rr-back.button {
+    background: #555;
+}
+.rr-back.button:hover:not(:disabled) {
+    background: #666;
+    box-shadow: none;
+}
+
+/* --- Form Inputs --- */
+.rr-form-step label {
+    display: block;
+    margin: 1rem 0;
+    font-weight: 600;
+    color: var(--rr-text);
+}
+.rr-form-step input[type="text"],
+.rr-form-step input[type="email"],
+.rr-form-step input[type="tel"],
+.rr-form-step select,
+.rr-form-step textarea {
+    box-sizing: border-box;
+    width: 100%;
+    margin-top: 0.35rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--rr-border);
+    border-radius: var(--rr-radius-sm);
+    background: var(--rr-bg-input);
+    color: var(--rr-text);
+    font: inherit;
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.rr-form-step input:focus,
+.rr-form-step select:focus,
+.rr-form-step textarea:focus {
+    border-color: var(--rr-primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(212,69,26,0.15);
+}
+.rr-form-step select {
+    appearance: auto;
+    cursor: pointer;
+}
+.rr-form-step select option {
+    background: var(--rr-bg-input);
+    color: var(--rr-text);
+}
+
+/* --- Honeypot --- */
+.rr-honeypot {
+    position: absolute !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    height: 1px !important;
+    width: 1px !important;
+    margin: -1px !important;
+    padding: 0 !important;
+    border: 0 !important;
+}
+
+/* --- Messages --- */
+.rr-message {
+    margin-top: 1rem;
+    padding: 0;
+    border-radius: var(--rr-radius-sm);
+    animation: rrFadeIn 0.3s ease;
+}
+.rr-message.is-error {
+    padding: 0.8rem 1rem;
+    background: rgba(212,69,26,0.12);
+    color: var(--rr-primary);
+    border: 1px solid rgba(212,69,26,0.2);
+}
+.rr-message.is-success {
+    padding: 1.5rem;
+    background: rgba(16,185,129,0.1);
+    color: #10B981;
+    border: 1px solid rgba(16,185,129,0.2);
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+.rr-message.is-success::before {
+    content: '✓';
+    display: block;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* --- Spinner --- */
+.rr-spinner {
+    display: none;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: rrSpin 0.6s linear infinite;
+}
+.rr-reservation-form.is-loading .rr-spinner {
+    display: inline-block;
+}
+@keyframes rrSpin {
+    to { transform: rotate(360deg); }
+}
+
+/* --- Responsive --- */
+@media (max-width: 480px) {
+    .rr-reservation-form {
+        padding: 1.25rem;
+        border-radius: var(--rr-radius-sm);
+    }
+    .rr-progress-step span:last-child {
+        display: none;
+    }
+    .rr-days {
+        gap: 0.15rem;
+    }
+    .rr-days button {
+        font-size: 0.8rem;
+    }
+    .rr-step-buttons {
+        flex-direction: column-reverse;
+    }
+    .rr-form-step .button {
+        width: 100%;
+        justify-content: center;
+    }
+}

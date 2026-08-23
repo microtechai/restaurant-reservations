@@ -10,7 +10,13 @@
 		function dateValue(date) { return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate()); }
 		function message(text, type) { $form.find('.rr-message').removeClass('is-error is-success').addClass(type ? 'is-' + type : '').text(text); }
 		function loading(active) { $form.toggleClass('is-loading', active).find(':submit').prop('disabled', active); }
-		function step(number) { $form.find('.rr-form-step').removeClass('is-active').filter('[data-step="' + number + '"]').addClass('is-active'); $form.find('.rr-progress span').removeClass('is-active').slice(0, number).addClass('is-active'); message(''); }
+		function step(number) {
+			$form.find('.rr-form-step').removeClass('is-active').filter('[data-step="' + number + '"]').addClass('is-active');
+			$form.find('.rr-progress-step').removeClass('is-active is-completed');
+			$form.find('.rr-progress-step').slice(0, number - 1).addClass('is-completed');
+			$form.find('.rr-progress-step').eq(number - 1).addClass('is-active');
+			message('');
+		}
 
 		function renderCalendar() {
 			var year = shown.getFullYear(), month = shown.getMonth(), firstDay = new Date(year, month, 1).getDay(), count = new Date(year, month + 1, 0).getDate();

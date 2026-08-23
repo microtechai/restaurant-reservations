@@ -34,5 +34,13 @@ function rr_initialize_plugin() {
 	new RRAjax();
 	new RRStats();
 	new RRStaffDashboard();
+	new RRThemeBridge();
 }
 add_action( 'init', 'rr_initialize_plugin', 5 );
+
+// GitHub Updater
+require_once RR_PLUGIN_PATH . 'includes/class-rr-updater.php';
+$rr_updater = new RRUpdater( __FILE__ );
+$rr_updater->set_username( 'microtechai' );
+$rr_updater->set_repository( 'restaurant-reservations' );
+$rr_updater->initialize();

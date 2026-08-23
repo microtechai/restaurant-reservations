@@ -1,7 +1,12 @@
 <?php if ( ! defined( 'ABSPATH' ) ) { exit; } ?>
 <div class="rr-reservation-widget">
+	<?php echo apply_filters( 'rr_reservation_form_before', '' ); ?>
 	<form class="rr-reservation-form" novalidate>
-		<div class="rr-progress" aria-label="<?php esc_attr_e( 'Reservation progress', 'restaurant-reservations' ); ?>"><span class="is-active">1</span><span>2</span><span>3</span></div>
+		<div class="rr-progress" aria-label="<?php esc_attr_e( 'Reservation progress', 'restaurant-reservations' ); ?>">
+			<div class="rr-progress-step is-active"><span>1</span><span><?php esc_html_e( 'Date', 'restaurant-reservations' ); ?></span></div>
+			<div class="rr-progress-step"><span>2</span><span><?php esc_html_e( 'Guests', 'restaurant-reservations' ); ?></span></div>
+			<div class="rr-progress-step"><span>3</span><span><?php esc_html_e( 'Details', 'restaurant-reservations' ); ?></span></div>
+		</div>
 		<section class="rr-form-step is-active" data-step="1">
 			<h2><?php esc_html_e( 'Choose a date and time', 'restaurant-reservations' ); ?></h2>
 			<input type="hidden" name="date" required><input type="hidden" name="time" required>
