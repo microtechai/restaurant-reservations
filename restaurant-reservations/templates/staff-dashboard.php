@@ -131,16 +131,14 @@ wp_enqueue_style( 'rr-staff-fonts', 'https://fonts.googleapis.com/css2?family=In
 						$time = get_post_meta( $reservation->ID, '_rr_time', true );
 						$guests = get_post_meta( $reservation->ID, '_rr_guests', true );
 						$table_name = get_post_meta( $reservation->ID, '_rr_table', true );
-						$phone = get_post_meta( $reservation->ID, '_rr_phone', true );
-						$email = get_post_meta( $reservation->ID, '_rr_email', true );
-						$notes = get_post_meta( $reservation->ID, '_rr_notes', true );
 					?>
 						<tr data-reservation-id="<?php echo esc_attr( $reservation->ID ); ?>">
 							<td data-label="<?php echo esc_attr__( 'Hora', 'restaurant-reservations' ); ?>"><?php echo esc_html( $time ); ?></td>
 							<td data-label="<?php echo esc_attr__( 'Cliente', 'restaurant-reservations' ); ?>"><?php echo esc_html( $reservation->post_title ); ?></td>
-							<td data-label="<?php echo esc_attr__( 'Teléfono', 'restaurant-reservations' ); ?>"><?php echo esc_html( $phone ?: '-' ); ?></td>
-							<td data-label="<?php echo esc_attr__( 'Email', 'restaurant-reservations' ); ?>"><?php echo esc_html( $email ?: '-' ); ?></td>
+							<td data-label="<?php echo esc_attr__( 'Teléfono', 'restaurant-reservations' ); ?>"><?php echo esc_html( get_post_meta( $reservation->ID, '_rr_phone', true ) ); ?></td>
+							<td data-label="<?php echo esc_attr__( 'Email', 'restaurant-reservations' ); ?>"><?php echo esc_html( get_post_meta( $reservation->ID, '_rr_email', true ) ); ?></td>
 							<td data-label="<?php echo esc_attr__( 'Comensales', 'restaurant-reservations' ); ?>"><?php echo esc_html( $guests ); ?></td>
+							<td data-label="<?php echo esc_attr__( 'Mesa', 'restaurant-reservations' ); ?>">
 							<td data-label="<?php echo esc_attr__( 'Mesa', 'restaurant-reservations' ); ?>">
 								<?php if ( $table_name ) : ?>
 									<?php echo esc_html( $table_name ); ?>
@@ -148,7 +146,7 @@ wp_enqueue_style( 'rr-staff-fonts', 'https://fonts.googleapis.com/css2?family=In
 									<span class="rr-table-badge--none"><?php echo esc_html__( 'Sin mesa', 'restaurant-reservations' ); ?></span>
 								<?php endif; ?>
 							</td>
-							<td data-label="<?php echo esc_attr__( 'Notas', 'restaurant-reservations' ); ?>"><?php echo esc_html( $notes ? mb_substr( $notes, 0, 50 ) : '-' ); ?></td>
+							<td data-label="<?php echo esc_attr__( 'Notas', 'restaurant-reservations' ); ?>"><?php echo esc_html( wp_trim_words( get_post_meta( $reservation->ID, '_rr_notes', true ), 10 ) ); ?></td>
 							<td data-label="<?php echo esc_attr__( 'Estado', 'restaurant-reservations' ); ?>"><span class="rr-status rr-status--<?php echo esc_attr( $status ); ?>"><?php echo esc_html( $status_labels[ $status ] ?? ucfirst( $status ) ); ?></span></td>
 							<td class="rr-actions" data-label="<?php echo esc_attr__( 'Acciones', 'restaurant-reservations' ); ?>">
 								<?php if ( in_array( $status, array( 'pending', 'confirmed' ), true ) ) : ?>
