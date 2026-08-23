@@ -41,9 +41,17 @@
 		$form.on('click', '.rr-back', function () { step(Number($(this).closest('.rr-form-step').data('step')) - 1); });
 		$form.on('change', '[name="guests"]', loadSlots);
 		$form.on('submit', function (event) {
-			event.preventDefault(); if (!$form[0].checkValidity()) { $form[0].reportValidity(); return; } loading(true); message('');
+			event.preventDefault(); loading(true); message('');
+			// Explicitly validate required fields (checkValidity skips hidden inputs)
+			var missing = [];
+			if (!$form.find('[name="date"]').val()) { missing.push('date'); }
+			if (!$form.find('[name="time"]').val()) { missing.push('time'); }
+			if (!$form.find('[name="guests"]').val() || $form.find('[name="guests"]').val() < 1) { missing.push('guests'); }
+			if (!$form.find('[name="name"]').val()) { missing.push('name'); }
+			if (!$form.find('[name="email"]').val()) { missing.push('email'); }
+			if (missing.length) { message(rrFrontend.i18n.error, 'error'); loading(false); return; }
 			var data = $form.serializeArray(); data.push({name: 'action', value: 'rr_submit_reservation'}, {name: 'nonce', value: rrFrontend.nonce});
-			$.post(rrFrontend.ajaxUrl, data).done(function (response) { if (response.success) { message(response.data.message, 'success'); $form[0].reset(); $form.find('.rr-datepicker, .rr-time-slots, .rr-form-step, .rr-progress').hide(); } else { message(response.data.message, 'error'); } }).fail(function (xhr) { message(xhr.responseJSON && xhr.responseJSON.data ? xhr.responseJSON.data.message : rrFrontend.i18n.error, 'error'); }).always(function () { loading(false); });
+			$.post(rrFrontend.ajaxUrl, data).done(function (response) { if (response.success) { message(response.data.message, 'success'); $form[0].reset(); shown = new Date(today.getFullYear(), today.getMonth(), 1); renderCalendar(); step(1); $form.find('.rr-datepicker, .rr-time-slots, .rr-progress').show(); } else { message(response.data.message, 'error'); } }).fail(function (xhr) { message(xhr.responseJSON && xhr.responseJSON.data ? xhr.responseJSON.data.message : rrFrontend.i18n.error, 'error'); }).always(function () { loading(false); });
 		});
 		renderCalendar();
 	});

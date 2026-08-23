@@ -36,7 +36,15 @@ class RRAjax {
 			'email' => sanitize_email( wp_unslash( $_POST['email'] ?? '' ) ), 'phone' => sanitize_text_field( wp_unslash( $_POST['phone'] ?? '' ) ),
 			'notes' => sanitize_textarea_field( wp_unslash( $_POST['notes'] ?? '' ) ),
 		);
-		if ( ! $data['date'] || ! $data['time'] || ! $data['guests'] || ! $data['name'] || ! is_email( $data['email'] ) ) { wp_send_json_error( array( 'message' => __( 'Please complete all required fields.', 'restaurant-reservations' ) ), 400 ); }
+		if ( ! $data['date'] || ! $data['time'] || ! $data['guests'] || ! $data['name'] || ! is_email( $data['email'] ) ) {
+			$missing = array();
+			if ( ! $data['date'] ) { $missing[] = 'date'; }
+			if ( ! $data['time'] ) { $missing[] = 'time'; }
+			if ( ! $data['guests'] ) { $missing[] = 'guests'; }
+			if ( ! $data['name'] ) { $missing[] = 'name'; }
+			if ( ! is_email( $data['email'] ) ) { $missing[] = 'email'; }
+			wp_send_json_error( array( 'message' => __( 'Please complete all required fields.', 'restaurant-reservations' ), 'missing' => $missing ), 400 );
+		}
 		$calendar = new RRCalendar();
 		if ( ! $calendar->is_slot_available( $data['date'], $data['time'], $data['guests'] ) ) { wp_send_json_error( array( 'message' => __( 'That time is no longer available.', 'restaurant-reservations' ) ), 409 ); }
 		$post_id = wp_insert_post( array( 'post_type' => 'rr_reservation', 'post_status' => 'pending', 'post_title' => $data['name'], 'post_content' => $data['notes'] ), true );
