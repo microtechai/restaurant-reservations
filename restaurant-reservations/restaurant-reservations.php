@@ -3,7 +3,7 @@
  * Plugin Name: Restaurant Reservations
  * Plugin URI: https://example.com/restaurant-reservations
  * Description: Complete restaurant table reservation system with calendar, statistics, and optional email notifications.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: Restaurant Reservations Team
  * License: GPLv2 or later
  * Text Domain: restaurant-reservations
