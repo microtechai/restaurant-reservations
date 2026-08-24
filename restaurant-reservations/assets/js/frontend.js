@@ -37,7 +37,7 @@
 			$.get(rrFrontend.ajaxUrl, {action: 'rr_check_availability', nonce: rrFrontend.nonce, date: date, guests: guests}).done(function (response) {
 				$slots.empty(); if (!response.success || !response.data.slots.length) { $slots.text(rrFrontend.i18n.noSlots); return; }
 				$.each(response.data.slots, function (_, time) { $('<button>', {type: 'button', text: time, 'data-time': time}).appendTo($slots); });
-			}).fail(function (xhr) { message(xhr.responseJSON && xhr.responseJSON.data ? xhr.responseJSON.data.message : rrFrontend.i18n.error, 'error'); }).always(function () { $slots.removeClass('is-loading'); });
+			}).fail(function (xhr) { try { var m = JSON.parse(xhr.responseText); message(m.data && m.data.message ? m.data.message : rrFrontend.i18n.error, 'error'); } catch(e) { message(rrFrontend.i18n.error, 'error'); } }).always(function () { $slots.removeClass('is-loading'); });
 		}
 
 		$form.on('click', '.rr-days button', function () { $form.find('[name="date"]').val($(this).data('date')); $days.find('button').removeClass('is-selected'); $(this).addClass('is-selected'); loadSlots(); });
@@ -54,12 +54,11 @@
 			if (!$form.find('[name="time"]').val()) { missing.push('time'); }
 			if (!$form.find('[name="guests"]').val() || $form.find('[name="guests"]').val() < 1) { missing.push('guests'); }
 			if (!$form.find('[name="name"]').val()) { missing.push('name'); }
-			if (!$form.find('[name="email"]').val()) { missing.push('email'); }
+			if (!$form.find('[name="phone"]').val()) { missing.push('phone'); }
 			if (missing.length) { message(rrFrontend.i18n.error, 'error'); loading(false); return; }
 			var data = $form.serializeArray(); data.push({name: 'action', value: 'rr_submit_reservation'}, {name: 'nonce', value: rrFrontend.nonce});
-			$.post(rrFrontend.ajaxUrl, data).done(function (response) { if (response.success) { message(response.data.message, 'success'); $form[0].reset(); shown = new Date(today.getFullYear(), today.getMonth(), 1); renderCalendar(); step(1); $form.find('.rr-datepicker, .rr-time-slots, .rr-progress').show(); } else { message(response.data.message, 'error'); } }).fail(function (xhr) { message(xhr.responseJSON && xhr.responseJSON.data ? xhr.responseJSON.data.message : rrFrontend.i18n.error, 'error'); }).always(function () { loading(false); });
+			$.post(rrFrontend.ajaxUrl, data).done(function (response) { if (response.success) { message(response.data && response.data.message ? response.data.message : 'Reserva confirmada', 'success'); $form[0].reset(); shown = new Date(today.getFullYear(), today.getMonth(), 1); renderCalendar(); step(1); $form.find('.rr-datepicker, .rr-time-slots, .rr-progress').show(); } else { message(response.data && response.data.message ? response.data.message : 'Error al procesar la reserva', 'error'); } }).fail(function (xhr) { try { var msg = JSON.parse(xhr.responseText); message(msg.data && msg.data.message ? msg.data.message : rrFrontend.i18n.error, 'error'); } catch(e) { message(rrFrontend.i18n.error, 'error'); } }).always(function () { loading(false); });
 		});
 		renderCalendar();
 	});
 }(jQuery));
-
