@@ -87,7 +87,7 @@ wp_enqueue_style( 'rr-staff-fonts', 'https://fonts.googleapis.com/css2?family=In
 <head>
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title><?php echo esc_html__( 'Cotufas 2 — Gestión de reservas', 'restaurant-reservations' ); ?></title>
+		<title><?php echo esc_html__( 'Libro de Reservas — Gestión de reservas', 'restaurant-reservations' ); ?></title>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Noto+Serif:wght@600;700&amp;display=swap" rel="stylesheet">
@@ -97,7 +97,7 @@ wp_enqueue_style( 'rr-staff-fonts', 'https://fonts.googleapis.com/css2?family=In
 ?>
 <main class="rr-staff-wrap">
 	<header class="rr-staff-header">
-		<a class="rr-staff-brand" href="<?php echo esc_url( site_url( '/mesas/' ) ); ?>">Cotufas 2</a>
+				<a class="rr-staff-brand" href="<?php echo esc_url( site_url( '/mesas/' ) ); ?>">Libro de Reservas</a>
 		<div class="rr-staff-account">
 			<span><?php echo esc_html( $current_user->display_name ); ?></span>
 			<a href="<?php echo esc_url( wp_logout_url( site_url( '/mesas/' ) ) ); ?>"><?php echo esc_html__( 'Cerrar sesión', 'restaurant-reservations' ); ?></a>

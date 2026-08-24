@@ -4,6 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 class RRThemeBridge {
     public function __construct() {
         add_filter( 'rr_reservation_form_before', array( $this, 'inject_theme_styles' ) );
+        add_action( 'wp_enqueue_scripts', array( $this, 'inject_staff_theme' ) );
     }
 
     public function inject_theme_styles( $content ) {
@@ -168,5 +169,55 @@ class RRThemeBridge {
             }
         }
         return $fonts;
+    }
+
+    public function inject_staff_theme() {
+        if ( ! get_query_var( 'rr_dashboard' ) ) {
+            return;
+        }
+
+        $palette = $this->get_theme_palette();
+        $is_dark = $this->is_dark_theme( $palette );
+
+        if ( $is_dark ) {
+            $css = ':root {
+                --rr-staff-bg: ' . ( $palette['base'] ?? '#1A1A1A' ) . ';
+                --rr-staff-surface: ' . ( $palette['superficie'] ?? '#2A2A2A' ) . ';
+                --rr-staff-text: ' . ( $palette['contrast'] ?? '#F5F0E8' ) . ';
+                --rr-staff-primary: ' . ( $palette['accent-1'] ?? '#D4451A' ) . ';
+                --rr-staff-border: ' . ( $palette['sand'] ?? '#3A3A3A' ) . ';
+                --rr-staff-muted: #888;
+                --rr-staff-input-bg: ' . ( $palette['base'] ?? '#1A1A1A' ) . ';
+                --rr-staff-card-bg: ' . ( $palette['superficie'] ?? '#2A2A2A' ) . ';
+                --rr-staff-header-border: ' . ( $palette['accent-1'] ?? '#D4451A' ) . ';
+            }';
+        } else {
+            // Light mode — for themes like El Cielo (blue #123A92, ivory #F7F2E8)
+            $css = ':root {
+                --rr-staff-bg: ' . ( $palette['contrast'] ?? '#F7F2E8' ) . ';
+                --rr-staff-surface: ' . ( $palette['base'] ?? '#FFFFFF' ) . ';
+                --rr-staff-text: ' . ( $palette['base'] ?? '#171B24' ) . ';
+                --rr-staff-primary: ' . ( $palette['accent-1'] ?? '#123A92' ) . ';
+                --rr-staff-border: ' . ( $palette['sand'] ?? '#DDD1BD' ) . ';
+                --rr-staff-muted: ' . ( $palette['olive'] ?? '#6F7653' ) . ';
+                --rr-staff-input-bg: #FFFFFF;
+                --rr-staff-card-bg: #FFFFFF;
+                --rr-staff-header-border: ' . ( $palette['accent-1'] ?? '#123A92' ) . ';
+            }';
+        }
+
+        echo '<style id="rr-staff-theme">' . $css . '</style>';
+    }
+
+    private function is_dark_theme( $palette ) {
+        if ( isset( $palette['base'] ) ) {
+            $color = ltrim( $palette['base'], '#' );
+            $r = hexdec( substr( $color, 0, 2 ) );
+            $g = hexdec( substr( $color, 2, 2 ) );
+            $b = hexdec( substr( $color, 4, 2 ) );
+            $luminance = ( $r * 0.299 + $g * 0.587 + $b * 0.114 );
+            return $luminance < 128;
+        }
+        return true; // default to dark
     }
 }
