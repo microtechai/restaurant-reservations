@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RR_VERSION', '1.0.0' );
+define( 'RR_VERSION', '1.1.0' );
 define( 'RR_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'RR_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
 
