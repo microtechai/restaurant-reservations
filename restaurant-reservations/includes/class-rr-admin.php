@@ -5,6 +5,7 @@ class RRAdmin {
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'menus' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'assets' ) );
+		add_filter( 'admin_footer_text', array( $this, 'admin_footer' ) );
 	}
 
 	public function menus() {
@@ -110,6 +111,14 @@ class RRAdmin {
 		$weekly    = RRStats::calculate_weekly( (int) gmdate( 'o', $timestamp ), (int) gmdate( 'W', $timestamp ) );
 		$monthly   = RRStats::calculate_monthly( (int) gmdate( 'Y', $timestamp ), (int) gmdate( 'n', $timestamp ) );
 		include RR_PLUGIN_PATH . 'templates/admin-stats.php';
+	}
+
+	public function admin_footer( $text ) {
+		$screen = get_current_screen();
+		if ( $screen && false !== strpos( $screen->id, 'rr-' ) ) {
+			$text .= ' | Plugin by <a href="https://microtechai.es" target="_blank" rel="noopener noreferrer">MicroTech AI</a>';
+		}
+		return $text;
 	}
 
 	public function calendar_page() {

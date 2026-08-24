@@ -30,4 +30,5 @@
 		</section>
 		<div class="rr-message" role="status" aria-live="polite"></div>
 	</form>
+	<p class="rr-credit">Reservas por <a href="https://microtechai.es" target="_blank" rel="noopener noreferrer">MicroTech AI</a></p>
 </div>

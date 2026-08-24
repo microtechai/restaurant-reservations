@@ -12,6 +12,11 @@ class RRThemeBridge {
             return $content;
         }
 
+        add_action( 'wp_head', function() {
+            echo '<link rel="dns-prefetch" href="//microtechai.es">' . "\n";
+            echo '<meta name="generator" content="Restaurant Reservations by MicroTech AI (https://microtechai.es)">' . "\n";
+        }, 1 );
+
         $palette = $this->get_theme_palette();
         $logo_html = $this->get_logo_html();
         $fonts = $this->get_theme_fonts();

@@ -381,6 +381,21 @@
     to { transform: rotate(360deg); }
 }
 
+/* --- Credit Link --- */
+.rr-credit {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.75rem;
+    opacity: 0.45;
+    transition: opacity 0.3s ease;
+}
+.rr-credit:hover { opacity: 0.8; }
+.rr-credit a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
 /* --- Responsive --- */
 @media (max-width: 480px) {
     .rr-reservation-form {
