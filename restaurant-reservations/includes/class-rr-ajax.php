@@ -54,7 +54,11 @@ class RRAjax {
 		$post_id = wp_insert_post( array( 'post_type' => 'rr_reservation', 'post_status' => 'pending', 'post_title' => $data['name'], 'post_content' => $data['notes'] ), true );
 		if ( is_wp_error( $post_id ) ) { ob_end_clean(); wp_send_json_error( array( 'message' => __( 'The reservation could not be saved.', 'restaurant-reservations' ) ) ); }
 		foreach ( array( 'date', 'time', 'guests', 'email', 'phone', 'notes' ) as $key ) { update_post_meta( $post_id, '_rr_' . $key, $data[ $key ] ); }
-		try { ( new RREmail() )->send_notifications( $post_id ); } catch ( Exception $e ) {}
+		// Send email asynchronously via wp-cron so the response is not blocked
+		try {
+			wp_clear_scheduled_hook( 'rr_send_notifications', array( $post_id ) );
+			wp_schedule_single_event( time() + 10, 'rr_send_notifications', array( $post_id ) );
+		} catch ( Exception $e ) {}
 		try { RRStats::calculate_daily( $data['date'] ); } catch ( Exception $e ) {}
 		ob_end_clean();
 		wp_send_json_success( array( 'message' => __( 'Your reservation has been received.', 'restaurant-reservations' ), 'reservation_id' => $post_id ) );

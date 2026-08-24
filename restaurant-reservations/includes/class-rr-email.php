@@ -1,6 +1,8 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
+add_action( 'rr_send_notifications', array( 'RREmail', 'send_notifications' ), 10, 1 );
+
 class RREmail {
 	private function replace( $template, $reservation_id ) {
 		$values = array(
@@ -13,7 +15,7 @@ class RREmail {
 		return strtr( $template, $values );
 	}
 
-	public function send_notifications( $reservation_id ) {
+	public static function send_notifications( $reservation_id ) {
 		if ( 'yes' !== get_option( 'rr_email_enabled', 'no' ) ) { return; }
 		$templates = get_option( 'rr_email_templates', array() );
 		$headers   = array( 'Content-Type: text/html; charset=UTF-8' );
@@ -27,4 +29,3 @@ class RREmail {
 		}
 	}
 }
-
