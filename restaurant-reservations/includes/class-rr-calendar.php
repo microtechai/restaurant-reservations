@@ -10,6 +10,14 @@ class RRCalendar {
 		$interval = max( 1, absint( get_option( 'rr_time_slot_interval', 30 ) ) );
 		$start = strtotime( $date . ' ' . $hours['open'] );
 		$end   = strtotime( $date . ' ' . $hours['close'] );
+		// Corregir cierre a medianoche (00:00) que se interpreta como inicio del día siguiente
+		if ( $hours['close'] === '00:00' || $hours['close'] === '24:00' ) {
+			$end = strtotime( $date . ' 23:59:59' );
+		}
+		// Si el cierre es anterior a apertura (dia siguiente), sumar un día
+		if ( $end <= $start ) {
+			$end += DAY_IN_SECONDS;
+		}
 		$slots = array();
 		for ( $time = $start; $time < $end; $time += $interval * MINUTE_IN_SECONDS ) {
 			$slot = gmdate( 'H:i', $time );
@@ -22,6 +30,7 @@ class RRCalendar {
 		$date   = sanitize_text_field( $date );
 		$time   = sanitize_text_field( $time );
 		$guests = absint( $guests );
+		if ( $this->is_service_closed( $date ) ) { return false; }
 		$today = current_time( 'Y-m-d' );
 		$last_date = gmdate( 'Y-m-d', current_time( 'timestamp' ) + 90 * DAY_IN_SECONDS );
 		if ( ! $this->valid_date( $date ) || $date < $today || $date > $last_date || ! preg_match( '/^(?:[01]\\d|2[0-3]):[0-5]\\d$/', $time ) || $guests < 1 || in_array( $date, $this->get_blocked_dates(), true ) ) { return false; }
@@ -34,6 +43,24 @@ class RRCalendar {
 			if ( $time === get_post_meta( $reservation->ID, '_rr_time', true ) && 'cancelled' !== $reservation->post_status ) { $total += absint( get_post_meta( $reservation->ID, '_rr_guests', true ) ); }
 		}
 		return $total + $guests <= absint( get_option( 'rr_max_guests_per_slot', 20 ) );
+	}
+
+	/**
+	 * Check if service is closed for a given date.
+	 *
+	 * @param string $date Y-m-d
+	 * @return bool True if service is closed, false otherwise
+	 */
+	public function is_service_closed( $date ) {
+		// Verificar si servicio global cerrado
+		$status = get_option( 'rr_availability_status', 'open' );
+		if ( $status === 'closed' ) { return true; }
+		
+		// Verificar si día específico está cerrado por horarios (días sin horarios definidos)
+		$hours = $this->get_business_hours( strtolower( gmdate( 'l', strtotime( $date ) ) ) );
+		if ( empty( $hours['open'] ) && empty( $hours['close'] ) ) { return true; }
+		
+		return false;
 	}
 
 	public function get_blocked_dates() {
