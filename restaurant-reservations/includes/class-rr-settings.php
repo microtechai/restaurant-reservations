@@ -7,6 +7,7 @@ class RRSettings {
 	public function register_settings() {
 		register_setting( 'rr_settings', 'rr_max_guests_per_slot', array( 'sanitize_callback' => 'absint', 'default' => 20 ) );
 		register_setting( 'rr_settings', 'rr_time_slot_interval', array( 'sanitize_callback' => array( $this, 'sanitize_interval' ), 'default' => 30 ) );
+		register_setting( 'rr_settings', 'rr_last_reservation_time', array( 'sanitize_callback' => array( $this, 'sanitize_last_time' ), 'default' => '23:00' ) );
 		register_setting( 'rr_settings', 'rr_business_hours', array( 'sanitize_callback' => array( $this, 'sanitize_hours' ) ) );
 		register_setting( 'rr_settings', 'rr_blocked_dates', array( 'sanitize_callback' => array( $this, 'sanitize_dates' ) ) );
 		register_setting( 'rr_settings', 'rr_email_admin', array( 'sanitize_callback' => 'sanitize_email' ) );
@@ -15,6 +16,7 @@ class RRSettings {
 		add_settings_section( 'rr_general', __( 'General', 'restaurant-reservations' ), '__return_false', 'rr-settings-general' );
 		add_settings_field( 'rr_max_guests', __( 'Maximum guests per slot', 'restaurant-reservations' ), array( $this, 'number_field' ), 'rr-settings-general', 'rr_general', array( 'option' => 'rr_max_guests_per_slot', 'min' => 1 ) );
 		add_settings_field( 'rr_interval', __( 'Time slot interval', 'restaurant-reservations' ), array( $this, 'interval_field' ), 'rr-settings-general', 'rr_general' );
+		add_settings_field( 'rr_last_time', __( 'Last reservation time', 'restaurant-reservations' ), array( $this, 'last_time_field' ), 'rr-settings-general', 'rr_general' );
 		add_settings_field( 'rr_blocked', __( 'Blocked dates', 'restaurant-reservations' ), array( $this, 'blocked_field' ), 'rr-settings-general', 'rr_general' );
 		add_settings_section( 'rr_hours', __( 'Business Hours', 'restaurant-reservations' ), '__return_false', 'rr-settings-hours' );
 		add_settings_field( 'rr_hours_field', __( 'Weekly hours', 'restaurant-reservations' ), array( $this, 'hours_field' ), 'rr-settings-hours', 'rr_hours' );
@@ -25,12 +27,14 @@ class RRSettings {
 	}
 
 	public function sanitize_interval( $value ) { return in_array( absint( $value ), array( 30, 60 ), true ) ? absint( $value ) : 30; }
+	public function sanitize_last_time( $value ) { return preg_match( '/^(?:[01]\\d|2[0-3]):[0-5]\\d$/', $value ) ? sanitize_text_field( $value ) : '23:00'; }
 	public function sanitize_toggle( $value ) { return 'yes' === $value ? 'yes' : 'no'; }
 	public function sanitize_dates( $value ) { $items = is_array( $value ) ? $value : explode( ',', (string) $value ); return array_values( array_filter( array_map( 'sanitize_text_field', $items ) ) ); }
 	public function sanitize_hours( $value ) { $clean = array(); foreach ( (array) $value as $day => $times ) { $clean[ sanitize_key( $day ) ] = array( 'open' => sanitize_text_field( $times['open'] ?? '' ), 'close' => sanitize_text_field( $times['close'] ?? '' ) ); } return $clean; }
 	public function sanitize_templates( $value ) { $clean = array(); foreach ( (array) $value as $key => $content ) { $clean[ sanitize_key( $key ) ] = false !== strpos( $key, 'body' ) ? wp_kses_post( $content ) : sanitize_text_field( $content ); } return $clean; }
 	public function number_field( $args ) { printf( '<input type="number" min="%d" name="%s" value="%d">', absint( $args['min'] ), esc_attr( $args['option'] ), absint( get_option( $args['option'], 20 ) ) ); }
 	public function interval_field() { $value = absint( get_option( 'rr_time_slot_interval', 30 ) ); echo '<select name="rr_time_slot_interval"><option value="30" ' . selected( $value, 30, false ) . '>' . esc_html__( '30 minutes', 'restaurant-reservations' ) . '</option><option value="60" ' . selected( $value, 60, false ) . '>' . esc_html__( '60 minutes', 'restaurant-reservations' ) . '</option></select>'; }
+	public function last_time_field() { printf( '<input type="time" name="rr_last_reservation_time" value="%s"><p class="description">%s</p>', esc_attr( get_option( 'rr_last_reservation_time', '23:00' ) ), esc_html__( 'The final selectable slot starts at this time.', 'restaurant-reservations' ) ); }
 	public function blocked_field() { echo '<input class="regular-text" name="rr_blocked_dates" value="' . esc_attr( implode( ',', get_option( 'rr_blocked_dates', array() ) ) ) . '"><p class="description">' . esc_html__( 'Comma-separated dates in YYYY-MM-DD format.', 'restaurant-reservations' ) . '</p>'; }
 	public function toggle_field() { echo '<label><input type="checkbox" name="rr_email_enabled" value="yes" ' . checked( get_option( 'rr_email_enabled' ), 'yes', false ) . '> ' . esc_html__( 'Send reservation emails', 'restaurant-reservations' ) . '</label>'; }
 	public function email_field() { echo '<input type="email" class="regular-text" name="rr_email_admin" value="' . esc_attr( get_option( 'rr_email_admin' ) ) . '">'; }

@@ -14,6 +14,8 @@ class RRCalendar {
 		if ( $hours['close'] === '00:00' || $hours['close'] === '24:00' ) {
 			$end = strtotime( $date . ' 23:59:59' );
 		}
+		// Business hours may run until midnight, but reservations close at 23:00.
+		$end = min( $end, $this->get_reservation_cutoff( $date, $interval ) );
 		// Si el cierre es anterior a apertura (dia siguiente), sumar un día
 		if ( $end <= $start ) {
 			$end += DAY_IN_SECONDS;
@@ -36,7 +38,7 @@ class RRCalendar {
 		if ( ! $this->valid_date( $date ) || $date < $today || $date > $last_date || ! preg_match( '/^(?:[01]\\d|2[0-3]):[0-5]\\d$/', $time ) || $guests < 1 || in_array( $date, $this->get_blocked_dates(), true ) ) { return false; }
 		$hours = $this->get_business_hours( strtolower( gmdate( 'l', strtotime( $date ) ) ) );
 		$interval = max( 1, absint( get_option( 'rr_time_slot_interval', 30 ) ) );
-		if ( empty( $hours['open'] ) || empty( $hours['close'] ) || $time < $hours['open'] || strtotime( $date . ' ' . $time ) + $interval * MINUTE_IN_SECONDS > strtotime( $date . ' ' . $hours['close'] ) ) { return false; }
+		if ( empty( $hours['open'] ) || empty( $hours['close'] ) || $time < $hours['open'] || strtotime( $date . ' ' . $time ) + $interval * MINUTE_IN_SECONDS > strtotime( $date . ' ' . $hours['close'] ) || strtotime( $date . ' ' . $time ) + $interval * MINUTE_IN_SECONDS > $this->get_reservation_cutoff( $date, $interval ) ) { return false; }
 		// Check global capacity
 		$total = 0;
 		foreach ( $this->get_reservations_for_date( $date ) as $reservation ) {
@@ -134,6 +136,13 @@ class RRCalendar {
 		}
 
 		return $available;
+	}
+
+	/** Return the end timestamp for the last bookable slot. */
+	private function get_reservation_cutoff( $date, $interval ) {
+		$last_time = get_option( 'rr_last_reservation_time', '23:00' );
+		if ( ! preg_match( '/^(?:[01]\\d|2[0-3]):[0-5]\\d$/', $last_time ) ) { $last_time = '23:00'; }
+		return strtotime( $date . ' ' . $last_time ) + max( 1, absint( $interval ) ) * MINUTE_IN_SECONDS;
 	}
 
 	private function valid_date( $date ) {

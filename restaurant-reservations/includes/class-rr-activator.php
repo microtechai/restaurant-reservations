@@ -6,12 +6,14 @@ class RRActivator {
 		RRPostTypes::register_post_type();
 		RRDatabase::create_table();
 		$hours = array();
-		foreach ( array( 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday' ) as $day ) {
-			$hours[ $day ] = array( 'open' => '12:00', 'close' => '22:00' );
+		foreach ( array( 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday' ) as $day ) {
+			$hours[ $day ] = array( 'open' => '09:00', 'close' => '24:00' );
 		}
+		$hours['sunday'] = array( 'open' => '', 'close' => '' );
 		$defaults   = array(
 			'max_guests_per_slot' => 20,
 			'time_slot_interval'   => 30,
+			'last_reservation_time' => '23:00',
 			'business_hours'       => $hours,
 			'blocked_dates'        => array(),
 			'email_admin'          => '',
