@@ -37,6 +37,7 @@
 			$.get(rrFrontend.ajaxUrl, {action: 'rr_check_availability', nonce: rrFrontend.nonce, date: date, guests: guests}).done(function (response) {
 				$slots.empty(); if (!response.success || !response.data.slots.length) { $slots.text(rrFrontend.i18n.noSlots); return; }
 				$.each(response.data.slots, function (_, time) { var $button = $('<button>', {type: 'button', text: time, 'data-time': time}); if ( time === selectedTime ) { $button.addClass('is-selected'); } $button.appendTo($slots); });
+				if ( selectedTime && response.data.slots.indexOf(selectedTime) >= 0 ) { $form.find('[name="time"]').val(selectedTime); $form.find('[data-step="1"] .rr-next').prop('disabled', false); }
 				if ( selectedTime && response.data.slots.indexOf(selectedTime) < 0 ) { $form.find('[name="time"]').val(''); }
 			}).fail(function (xhr) { try { var m = JSON.parse(xhr.responseText); message(m.data && m.data.message ? m.data.message : rrFrontend.i18n.error, 'error'); } catch(e) { message(rrFrontend.i18n.error, 'error'); } }).always(function () { $slots.removeClass('is-loading'); });
 		}
