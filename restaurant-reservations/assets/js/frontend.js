@@ -32,11 +32,12 @@
 		}
 
 		function loadSlots() {
-			var date = $form.find('[name="date"]').val(), guests = $form.find('[name="guests"]').val(); if (!date) { return; }
+			var date = $form.find('[name="date"]').val(), guests = $form.find('[name="guests"]').val(), selectedTime = $form.find('[name="time"]').val(); if (!date) { return; }
 			$slots.addClass('is-loading').text(rrFrontend.i18n.checking); $form.find('[name="time"]').val(''); $form.find('[data-step="1"] .rr-next').prop('disabled', true);
 			$.get(rrFrontend.ajaxUrl, {action: 'rr_check_availability', nonce: rrFrontend.nonce, date: date, guests: guests}).done(function (response) {
 				$slots.empty(); if (!response.success || !response.data.slots.length) { $slots.text(rrFrontend.i18n.noSlots); return; }
-				$.each(response.data.slots, function (_, time) { $('<button>', {type: 'button', text: time, 'data-time': time}).appendTo($slots); });
+				$.each(response.data.slots, function (_, time) { var $button = $('<button>', {type: 'button', text: time, 'data-time': time}); if ( time === selectedTime ) { $button.addClass('is-selected'); } $button.appendTo($slots); });
+				if ( selectedTime && response.data.slots.indexOf(selectedTime) < 0 ) { $form.find('[name="time"]').val(''); }
 			}).fail(function (xhr) { try { var m = JSON.parse(xhr.responseText); message(m.data && m.data.message ? m.data.message : rrFrontend.i18n.error, 'error'); } catch(e) { message(rrFrontend.i18n.error, 'error'); } }).always(function () { $slots.removeClass('is-loading'); });
 		}
 
