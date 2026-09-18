@@ -23,6 +23,7 @@ class RRCalendar {
 		$slots = array();
 		for ( $time = $start; $time < $end; $time += $interval * MINUTE_IN_SECONDS ) {
 			$slot = gmdate( 'H:i', $time );
+			if ( $this->slot_overlaps_break( $date, $slot, $interval, $hours ) ) { continue; }
 			if ( $this->is_slot_available( $date, $slot, $guests ) ) { $slots[] = $slot; }
 		}
 		return $slots;
@@ -39,6 +40,7 @@ class RRCalendar {
 		$hours = $this->get_business_hours( strtolower( gmdate( 'l', strtotime( $date ) ) ) );
 		$interval = max( 1, absint( get_option( 'rr_time_slot_interval', 30 ) ) );
 		if ( empty( $hours['open'] ) || empty( $hours['close'] ) || $time < $hours['open'] || strtotime( $date . ' ' . $time ) + $interval * MINUTE_IN_SECONDS > strtotime( $date . ' ' . $hours['close'] ) || strtotime( $date . ' ' . $time ) + $interval * MINUTE_IN_SECONDS > $this->get_reservation_cutoff( $date, $interval ) ) { return false; }
+		if ( $this->slot_overlaps_break( $date, $time, $interval, $hours ) ) { return false; }
 		// Check global capacity
 		$total = 0;
 		foreach ( $this->get_reservations_for_date( $date ) as $reservation ) {
@@ -143,6 +145,18 @@ class RRCalendar {
 		$last_time = get_option( 'rr_last_reservation_time', '23:00' );
 		if ( ! preg_match( '/^(?:[01]\\d|2[0-3]):[0-5]\\d$/', $last_time ) ) { $last_time = '23:00'; }
 		return strtotime( $date . ' ' . $last_time ) + max( 1, absint( $interval ) ) * MINUTE_IN_SECONDS;
+	}
+
+	/** Return true when a slot overlaps the configured service break. */
+	private function slot_overlaps_break( $date, $time, $interval, $hours ) {
+		$break_open  = sanitize_text_field( $hours['break_open'] ?? '' );
+		$break_close = sanitize_text_field( $hours['break_close'] ?? '' );
+		if ( ! preg_match( '/^(?:[01]\\d|2[0-3]):[0-5]\\d$/', $break_open ) || ! preg_match( '/^(?:[01]\\d|2[0-3]):[0-5]\\d$/', $break_close ) ) { return false; }
+		$slot_start  = strtotime( $date . ' ' . $time );
+		$slot_end    = $slot_start + max( 1, absint( $interval ) ) * MINUTE_IN_SECONDS;
+		$break_start = strtotime( $date . ' ' . $break_open );
+		$break_end   = strtotime( $date . ' ' . $break_close );
+		return $slot_start < $break_end && $slot_end > $break_start;
 	}
 
 	private function valid_date( $date ) {

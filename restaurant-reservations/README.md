@@ -7,6 +7,7 @@ A complete WordPress table-reservation plugin with a theme-independent shortcode
 1. Copy `restaurant-reservations` into `wp-content/plugins/`.
 2. Activate **Restaurant Reservations** in WordPress.
 3. Configure hours and capacity under **Reservations → Settings**.
+   Optional `break_open` / `break_close` values exclude a daily service break (for example, between lunch and dinner).
 4. Add `[rr_reservation_form]` to any page or post.
 
 ## Requirements
