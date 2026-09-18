@@ -21,7 +21,8 @@ class RRDatabase {
 			total_guests int(11) NOT NULL DEFAULT 0,
 			max_guests int(11) NOT NULL DEFAULT 0,
 			created_at datetime NOT NULL,
-			PRIMARY KEY (id), UNIQUE KEY date (date)
+			PRIMARY KEY  (id),
+			UNIQUE KEY date_unique (date)
 		) {$charset};";
 		dbDelta( $sql );
 	}
