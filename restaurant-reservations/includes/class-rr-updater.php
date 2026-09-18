@@ -37,7 +37,7 @@ class RRUpdater {
             if ( is_wp_error( $response ) ) { return false; }
             $this->github_response = json_decode( wp_remote_retrieve_body( $response ) );
             if ( is_array( $this->github_response ) ) {
-                $this->github_response = $this->github_response[0];
+                $this->github_response = $this->github_response[0] ?? false;
             }
         }
     }
